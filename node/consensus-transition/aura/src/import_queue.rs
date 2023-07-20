@@ -21,7 +21,7 @@
 use crate::{
 	aura_err, authorities, find_pre_digest, slot_author, AuthorityId, CompatibilityMode, Error,
 };
-use codec::{Codec, Decode, Encode};
+use parity_scale_codec::{Codec, Decode, Encode};
 use log::{debug, info, trace};
 use prometheus_endpoint::Registry;
 use sc_client_api::{backend::AuxStore, BlockOf, UsageProvider};

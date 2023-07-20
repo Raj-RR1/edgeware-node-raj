@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Edgeware.  If not, see <http://www.gnu.org/licenses/>.
 
-use codec::{Decode, Encode};
+use parity_scale_codec::{Decode, Encode};
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
 use edgeware_executor::Executor;
 use edgeware_primitives::{BlockNumber, Hash};
