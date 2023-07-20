@@ -19,8 +19,6 @@ use edgeware_client_evm_tracing::types::single;
 use edgeware_rpc_core_types::RequestBlockId;
 use serde::Deserialize;
 
-pub use rpc_impl_Debug::gen_server::Debug as DebugServer;
-
 #[derive(Clone, Eq, PartialEq, Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct TraceParams {

@@ -24,7 +24,7 @@
 //! - For each traced block an async task responsible to wait for a permit, spawn a blocking
 //!   task and waiting for the result, then send it to the main `CacheTask`.
 
-use futures::{select, stream::FuturesUnordered, FutureExt, SinkExt, StreamExt};
+use futures::{select, stream::FuturesUnordered, FutureExt, StreamExt};
 use std::{collections::BTreeMap, future::Future, marker::PhantomData, sync::Arc, time::Duration};
 use tokio::{
 	sync::{mpsc, oneshot, Semaphore},
@@ -42,7 +42,7 @@ use sp_blockchain::{
 use sp_runtime::traits::{BlakeTwo256, Block as BlockT};
 
 use ethereum_types::H256;
-use fc_rpc::{frontier_backend_client, OverrideHandle};
+use fc_rpc::OverrideHandle;
 use fp_rpc::EthereumRuntimeRPCApi;
 
 use edgeware_client_evm_tracing::{
@@ -127,10 +127,9 @@ where
 				continue; // no traces for genesis block.
 			}
 
-			let block_id = BlockId::<B>::Number(block_height);
-			let block_header = self
+			let block_hash = self
 				.client
-				.header(block_id)
+				.hash(block_height)
 				.map_err(|e| {
 					format!(
 						"Error when fetching block {} header : {:?}",
@@ -138,8 +137,6 @@ where
 					)
 				})?
 				.ok_or_else(|| format!("Block with height {} don't exist", block_height))?;
-
-			let block_hash = block_header.hash();
 
 			block_hashes.push(block_hash);
 		}
@@ -318,11 +315,10 @@ impl CacheRequester {
 		let mut sender = self.0.clone();
 
 		sender
-			.send(CacheRequest::GetTraces {
+			.unbounded_send(CacheRequest::GetTraces {
 				sender: response_tx,
 				block,
 			})
-			.await
 			.map_err(|e| {
 				format!(
 					"Failed to send request to the trace cache task. Error : {:?}",
@@ -345,13 +341,12 @@ impl CacheRequester {
 	/// this batch and still in the waiting pool will be discarded.
 	#[instrument(skip(self))]
 	pub async fn stop_batch(&self, batch_id: CacheBatchId) {
-		let mut sender = self.0.clone();
+		let sender = self.0.clone();
 
 		// Here we don't care if the request has been accepted or refused, the caller can't
 		// do anything with it.
 		let _ = sender
-			.send(CacheRequest::StopBatch { batch_id })
-			.await
+			.unbounded_send(CacheRequest::StopBatch { batch_id })
 			.map_err(|e| {
 				format!(
 					"Failed to send request to the trace cache task. Error : {:?}",
@@ -448,7 +443,7 @@ where
 	) -> (impl Future<Output = ()>, CacheRequester) {
 		// Communication with the outside world :
 		let (requester_tx, mut requester_rx) =
-			sc_utils::mpsc::tracing_unbounded("trace-filter-cache");
+			sc_utils::mpsc::tracing_unbounded("trace-filter-cache", 100_000);
 
 		// Task running in the service.
 		let task = async move {
@@ -718,7 +713,7 @@ where
 
 	/// A tracing blocking task notifies it has finished the tracing and provide the result.
 	#[instrument(skip(self, result))]
-	fn blocking_finished(&mut self, block_hash: H256, result: Result<Vec<TransactionTrace>>) {
+	fn blocking_finished(&mut self, block_hash: H256, result: TxsTraceRes) {
 		// In some cases it might be possible to receive traces of a block
 		// that has no entry in the cache because it was removed of the pool
 		// and received a permit concurrently. We just ignore it.
@@ -795,28 +790,25 @@ where
 			.ok_or_else(|| format!("Substrate block {} don't exist", substrate_block_id))?;
 
 		let height = *block_header.number();
-		let substrate_parent_id = BlockId::<B>::Hash(*block_header.parent_hash());
+		let substrate_parent_hash = *block_header.parent_hash();
 
-		let schema = frontier_backend_client::onchain_storage_schema::<B, C, BE>(
-			client.as_ref(),
-			substrate_block_id,
-		);
+		let schema = fc_storage::onchain_storage_schema::<B, C, BE>(client.as_ref(), substrate_hash);
 
 		// Get Ethereum block data.
 		let (eth_block, eth_transactions) = match overrides.schemas.get(&schema) {
 			Some(schema) => match (
-				schema.current_block(&substrate_block_id),
-				schema.current_transaction_statuses(&substrate_block_id),
+				schema.current_block(substrate_hash),
+				schema.current_transaction_statuses(substrate_hash),
 			) {
 				(Some(a), Some(b)) => (a, b),
 				_ => {
 					return Err(format!(
 						"Failed to get Ethereum block data for Substrate block {}",
-						substrate_block_id
+						substrate_hash
 					))
 				}
 			},
-			_ => return Err(format!("No storage override at {:?}", substrate_block_id)),
+			_ => return Err(format!("No storage override at {:?}", substrate_hash)),
 		};
 
 		let eth_block_hash = eth_block.header.hash();
@@ -828,7 +820,7 @@ where
 		// Get extrinsics (containing Ethereum ones)
 		let extrinsics = backend
 			.blockchain()
-			.body(substrate_block_id)
+			.body(substrate_hash)
 			.map_err(|e| {
 				format!(
 					"Blockchain error when fetching extrinsics of block {} : {:?}",
@@ -839,11 +831,11 @@ where
 
 		// Trace the block.
 		let f = || -> Result<_, String> {
-			api.initialize_block(&substrate_parent_id, &block_header)
-					.map_err(|e| format!("Runtime api access error: {:?}", e))?;
+			api.initialize_block(substrate_parent_hash, &block_header)
+				.map_err(|e| format!("Runtime api access error: {:?}", e))?;
 
 			let _result = api
-				.trace_block(&substrate_parent_id, extrinsics, eth_tx_hashes)
+				.trace_block(substrate_parent_hash, extrinsics, eth_tx_hashes)
 				.map_err(|e| format!("Blockchain error when replaying block {} : {:?}", height, e))?
 				.map_err(|e| {
 					tracing::warn!(
