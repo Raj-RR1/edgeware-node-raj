@@ -21,7 +21,7 @@
 
 use super::ConsensusDataProvider;
 use crate::Error;
-use codec::Encode;
+use parity_scale_codec::Encode;
 use sc_client_api::{AuxStore, UsageProvider};
 use sc_consensus_babe::{
 	authorship, find_pre_digest, BabeIntermediate, CompatibleDigestItem, Config, Epoch,

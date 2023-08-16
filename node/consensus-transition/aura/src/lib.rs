@@ -35,7 +35,7 @@ use std::{fmt::Debug, hash::Hash, marker::PhantomData, pin::Pin, sync::Arc};
 use futures::prelude::*;
 use log::{debug, trace};
 
-use codec::{Codec, Decode, Encode};
+use parity_scale_codec::{Codec, Decode, Encode};
 
 use sc_client_api::{backend::AuxStore, BlockOf, UsageProvider};
 use sc_consensus::{BlockImport, BlockImportParams, ForkChoiceStrategy, StateAction};

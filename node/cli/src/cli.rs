@@ -72,6 +72,11 @@ pub struct RunCmd {
 	#[clap(long, default_value = "300000000")]
 	pub eth_statuses_cache: usize,
 
+	/// Size in bytes of data a raw tracing request is allowed to use.
+	/// Bound the size of memory, stack and storage data.
+	#[clap(long, default_value = "20000000")]
+	pub tracing_raw_max_memory_usage: usize,
+
 	/// Maximum number of logs in a query.
 	#[clap(long, default_value = "10000")]
 	pub max_past_logs: u32,
@@ -96,8 +101,7 @@ pub struct Cli {
 	#[clap(flatten)]
 	pub run: RunCmd,
 
-
-		/// Disable automatic hardware benchmarks.
+	/// Disable automatic hardware benchmarks.
 	///
 	/// By default these benchmarks are automatically ran at startup and measure
 	/// the CPU speed, the memory bandwidth and the disk speed.
@@ -115,7 +119,8 @@ pub struct Cli {
 /// Possible subcommands of the main binary.
 #[derive(Debug, clap::Subcommand)]
 pub enum Subcommand {
-		/// The custom inspect subcommmand for decoding blocks and extrinsics.
+
+	/// The custom inspect subcommmand for decoding blocks and extrinsics.
 		#[command(
 			name = "inspect",
 			about = "Decode given block or extrinsic using current native runtime."
@@ -130,11 +135,12 @@ pub enum Subcommand {
 	#[clap(subcommand)]
 	Benchmark(frame_benchmarking_cli::BenchmarkCmd),
 
-		/// Try some command against runtime state.
-		#[cfg(feature = "try-runtime")]
-		TryRuntime(try_runtime_cli::TryRuntimeCmd),
 
-			/// Try some command against runtime state. Note: `try-runtime` feature must be enabled.
+	/// Try some command against runtime state.
+	#[cfg(feature = "try-runtime")]
+	TryRuntime(try_runtime_cli::TryRuntimeCmd),
+
+	/// Try some command against runtime state. Note: `try-runtime` feature must be enabled.
 	#[cfg(not(feature = "try-runtime"))]
 	TryRuntime,
 
@@ -169,6 +175,6 @@ pub enum Subcommand {
 	/// Revert the chain to a previous state.
 	Revert(sc_cli::RevertCmd),
 
-		/// Db meta columns information.
-		ChainInfo(sc_cli::ChainInfoCmd),
+	/// Db meta columns information.
+	ChainInfo(sc_cli::ChainInfoCmd),
 }

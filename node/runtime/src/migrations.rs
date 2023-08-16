@@ -29,7 +29,7 @@ impl OnRuntimeUpgrade for PhragmenElectionDepositRuntimeUpgrade {
 }
 
 pub mod staking_migration_v5 {
-	use codec::Decode;
+	use parity_scale_codec::Decode;
 	#[derive(Decode)]
 	struct OldValidatorPrefs {
 		#[codec(compact)]
