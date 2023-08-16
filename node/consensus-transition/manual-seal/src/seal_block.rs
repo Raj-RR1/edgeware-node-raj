@@ -36,7 +36,7 @@ use std::{collections::HashMap, sync::Arc, time::Duration};
 pub const MAX_PROPOSAL_DURATION: u64 = 10;
 
 /// params for sealing a new block
-pub struct SealBlockParams<'a, B: BlockT, BI, SC, C: ProvideRuntimeApi<B>, E, TP, CIDP> {
+pub struct SealBlockParams<'a, B: BlockT, BI, SC, C: ProvideRuntimeApi<B>, E, TP, CIDP, P> {
 	/// if true, empty blocks(without extrinsics) will be created.
 	/// otherwise, will return Error::EmptyTransactionPool.
 	pub create_empty: bool,
@@ -56,7 +56,7 @@ pub struct SealBlockParams<'a, B: BlockT, BI, SC, C: ProvideRuntimeApi<B>, E, TP
 	pub select_chain: &'a SC,
 	/// Digest provider for inclusion in blocks.
 	pub consensus_data_provider:
-		Option<&'a dyn ConsensusDataProvider<B, Transaction = TransactionFor<C, B>>>,
+		Option<&'a dyn ConsensusDataProvider<B, Proof = P, Transaction = TransactionFor<C, B>>>,
 	/// block import object
 	pub block_import: &'a mut BI,
 	/// Something that can create the inherent data providers.
@@ -64,7 +64,7 @@ pub struct SealBlockParams<'a, B: BlockT, BI, SC, C: ProvideRuntimeApi<B>, E, TP
 }
 
 /// seals a new block with the given params
-pub async fn seal_block<B, BI, SC, C, E, TP, CIDP>(
+pub async fn seal_block<B, BI, SC, C, E, TP, CIDP, P>(
 	SealBlockParams {
 		create_empty,
 		finalize,
@@ -77,7 +77,7 @@ pub async fn seal_block<B, BI, SC, C, E, TP, CIDP>(
 		create_inherent_data_providers,
 		consensus_data_provider: digest_provider,
 		mut sender,
-	}: SealBlockParams<'_, B, BI, SC, C, E, TP, CIDP>,
+	}: SealBlockParams<'_, B, BI, SC, C, E, TP, CIDP,P>,
 ) where
 	B: BlockT,
 	BI: BlockImport<B, Error = sp_consensus::Error, Transaction = sp_api::TransactionFor<C, B>>
@@ -91,6 +91,7 @@ pub async fn seal_block<B, BI, SC, C, E, TP, CIDP>(
 	SC: SelectChain<B>,
 	TransactionFor<C, B>: 'static,
 	CIDP: CreateInherentDataProviders<B, ()>,
+	P: Send + Sync + 'static,
 {
 	let future = async {
 		if pool.status().ready == 0 && !create_empty {
@@ -102,7 +103,7 @@ pub async fn seal_block<B, BI, SC, C, E, TP, CIDP>(
 		// or fetch the best_block.
 		let parent = match parent_hash {
 			Some(hash) => client
-				.header(BlockId::Hash(hash))?
+				.header(hash)?
 				.ok_or_else(|| Error::BlockNotFound(format!("{}", hash)))?,
 			None => select_chain.best_chain().await?,
 		};
@@ -112,7 +113,7 @@ pub async fn seal_block<B, BI, SC, C, E, TP, CIDP>(
 			.await
 			.map_err(|e| Error::Other(e))?;
 
-		let inherent_data = inherent_data_providers.create_inherent_data()?;
+		let inherent_data = inherent_data_providers.create_inherent_data().await?;
 
 		let proposer = env.init(&parent).map_err(|err| Error::StringError(err.to_string())).await?;
 		let inherents_len = inherent_data.len();
@@ -139,6 +140,7 @@ pub async fn seal_block<B, BI, SC, C, E, TP, CIDP>(
 
 		let (header, body) = proposal.block.deconstruct();
 		let mut params = BlockImportParams::new(BlockOrigin::Own, header.clone());
+		let proof = proposal.proof;
 		params.body = Some(body);
 		params.finalized = finalize;
 		params.fork_choice = Some(ForkChoiceStrategy::LongestChain);
@@ -147,7 +149,7 @@ pub async fn seal_block<B, BI, SC, C, E, TP, CIDP>(
 		));
 
 		if let Some(digest_provider) = digest_provider {
-			digest_provider.append_block_import(&parent, &mut params, &inherent_data)?;
+			digest_provider.append_block_import(&parent, &mut params, &inherent_data, proof)?;
 		}
 
 		// Make sure we return the same post-hash that will be calculated when importing the block
@@ -155,7 +157,7 @@ pub async fn seal_block<B, BI, SC, C, E, TP, CIDP>(
 		let mut post_header = header.clone();
 		post_header.digest_mut().logs.extend(params.post_digests.iter().cloned());
 
-		match block_import.import_block(params, HashMap::new()).await? {
+		match block_import.import_block(params).await? {
 			ImportResult::Imported(aux) =>
 				Ok(CreatedBlock { hash: <B as BlockT>::Header::hash(&post_header), aux }),
 			other => Err(other.into()),
