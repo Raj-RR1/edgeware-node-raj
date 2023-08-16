@@ -81,7 +81,7 @@ where
 }
 
 /// Params required to start the instant sealing authorship task.
-pub struct ManualSealParams<B: BlockT, BI, E, C: ProvideRuntimeApi<B>, TP, SC, CS, CIDP> {
+pub struct ManualSealParams<B: BlockT, BI, E, C: ProvideRuntimeApi<B>, TP, SC, CS, CIDP, P> {
 	/// Block import instance for well. importing blocks.
 	pub block_import: BI,
 
@@ -103,14 +103,14 @@ pub struct ManualSealParams<B: BlockT, BI, E, C: ProvideRuntimeApi<B>, TP, SC, C
 
 	/// Digest provider for inclusion in blocks.
 	pub consensus_data_provider:
-		Option<Box<dyn ConsensusDataProvider<B, Transaction = TransactionFor<C, B>>>>,
+		Option<Box<dyn ConsensusDataProvider<B,  Proof = P, Transaction = TransactionFor<C, B>>>>,
 
 	/// Something that can create the inherent data providers.
 	pub create_inherent_data_providers: CIDP,
 }
 
 /// Params required to start the manual sealing authorship task.
-pub struct InstantSealParams<B: BlockT, BI, E, C: ProvideRuntimeApi<B>, TP, SC, CIDP> {
+pub struct InstantSealParams<B: BlockT, BI, E, C: ProvideRuntimeApi<B>, TP, SC, CIDP, P> {
 	/// Block import instance for well. importing blocks.
 	pub block_import: BI,
 
@@ -128,14 +128,26 @@ pub struct InstantSealParams<B: BlockT, BI, E, C: ProvideRuntimeApi<B>, TP, SC, 
 
 	/// Digest provider for inclusion in blocks.
 	pub consensus_data_provider:
-		Option<Box<dyn ConsensusDataProvider<B, Transaction = TransactionFor<C, B>>>>,
+		Option<Box<dyn ConsensusDataProvider<B, Proof = P, Transaction = TransactionFor<C, B>>>>,
 
 	/// Something that can create the inherent data providers.
 	pub create_inherent_data_providers: CIDP,
 }
 
+/// Params required to start the delayed finalization task.
+pub struct DelayedFinalizeParams<C, S> {
+	/// Block import instance.
+	pub client: Arc<C>,
+
+	/// Handle for spawning delayed finalization tasks.
+	pub spawn_handle: S,
+
+	/// The delay in seconds before a block is finalized.
+	pub delay_sec: u64,
+}
+
 /// Creates the background authorship task for the manual seal engine.
-pub async fn run_manual_seal<B, BI, CB, E, C, TP, SC, CS, CIDP>(
+pub async fn run_manual_seal<B, BI, CB, E, C, TP, SC, CS, CIDP, P>(
 	ManualSealParams {
 		mut block_import,
 		mut env,
@@ -161,6 +173,7 @@ pub async fn run_manual_seal<B, BI, CB, E, C, TP, SC, CS, CIDP>(
 	TransactionFor<C, B>: 'static,
 	TP: TransactionPool<Block = B>,
 	CIDP: CreateInherentDataProviders<B, ()>,
+	P: Send + Sync + 'static,
 {
 	while let Some(command) = commands_stream.next().await {
 		match command {
@@ -198,7 +211,7 @@ pub async fn run_manual_seal<B, BI, CB, E, C, TP, SC, CS, CIDP>(
 /// runs the background authorship task for the instant seal engine.
 /// instant-seal creates a new block for every transaction imported into
 /// the transaction pool.
-pub async fn run_instant_seal<B, BI, CB, E, C, TP, SC, CIDP>(
+pub async fn run_instant_seal<B, BI, CB, E, C, TP, SC, CIDP, P>(
 	InstantSealParams {
 		block_import,
 		env,
@@ -207,7 +220,7 @@ pub async fn run_instant_seal<B, BI, CB, E, C, TP, SC, CIDP>(
 		select_chain,
 		consensus_data_provider,
 		create_inherent_data_providers,
-	}: InstantSealParams<B, BI, E, C, TP, SC, CIDP>,
+	}: InstantSealParams<B, BI, E, C, TP, SC, CIDP, P>,
 ) where
 	B: BlockT + 'static,
 	BI: BlockImport<B, Error = sp_consensus::Error, Transaction = sp_api::TransactionFor<C, B>>
@@ -222,6 +235,7 @@ pub async fn run_instant_seal<B, BI, CB, E, C, TP, SC, CIDP>(
 	TransactionFor<C, B>: 'static,
 	TP: TransactionPool<Block = B>,
 	CIDP: CreateInherentDataProviders<B, ()>,
+	P: Send + Sync + 'static,
 {
 	// instant-seal creates blocks as soon as transactions are imported
 	// into the transaction pool.
@@ -243,6 +257,98 @@ pub async fn run_instant_seal<B, BI, CB, E, C, TP, SC, CIDP>(
 		create_inherent_data_providers,
 	})
 	.await
+}
+
+/// Runs the background authorship task for the instant seal engine.
+/// instant-seal creates a new block for every transaction imported into
+/// the transaction pool.
+///
+/// This function will finalize the block immediately as well. If you don't
+/// want this behavior use `run_instant_seal` instead.
+pub async fn run_instant_seal_and_finalize<B, BI, CB, E, C, TP, SC, CIDP, P>(
+	InstantSealParams {
+		block_import,
+		env,
+		client,
+		pool,
+		select_chain,
+		consensus_data_provider,
+		create_inherent_data_providers,
+	}: InstantSealParams<B, BI, E, C, TP, SC, CIDP, P>,
+) where
+	B: BlockT + 'static,
+	BI: BlockImport<B, Error = sp_consensus::Error, Transaction = sp_api::TransactionFor<C, B>>
+		+ Send
+		+ Sync
+		+ 'static,
+	C: HeaderBackend<B> + Finalizer<B, CB> + ProvideRuntimeApi<B> + 'static,
+	CB: ClientBackend<B> + 'static,
+	E: Environment<B> + 'static,
+	E::Proposer: Proposer<B, Proof = P, Transaction = TransactionFor<C, B>>,
+	SC: SelectChain<B> + 'static,
+	TransactionFor<C, B>: 'static,
+	TP: TransactionPool<Block = B>,
+	CIDP: CreateInherentDataProviders<B, ()>,
+	P: Send + Sync + 'static,
+{
+	// Creates and finalizes blocks as soon as transactions are imported
+	// into the transaction pool.
+	let commands_stream = pool.import_notification_stream().map(|_| EngineCommand::SealNewBlock {
+		create_empty: false,
+		finalize: true,
+		parent_hash: None,
+		sender: None,
+	});
+
+	run_manual_seal(ManualSealParams {
+		block_import,
+		env,
+		client,
+		pool,
+		commands_stream,
+		select_chain,
+		consensus_data_provider,
+		create_inherent_data_providers,
+	})
+	.await
+}
+
+/// Creates a future for delayed finalization of manual sealed blocks.
+///
+/// The future needs to be spawned in the background alongside the
+/// [`run_manual_seal`]/[`run_instant_seal`] future. It is required that
+/// [`EngineCommand::SealNewBlock`] is send with `finalize = false` to not finalize blocks directly
+/// after building them. This also means that delayed finality can not be used with
+/// [`run_instant_seal_and_finalize`].
+pub async fn run_delayed_finalize<B, CB, C, S>(
+	DelayedFinalizeParams { client, spawn_handle, delay_sec }: DelayedFinalizeParams<C, S>,
+) where
+	B: BlockT + 'static,
+	CB: ClientBackend<B> + 'static,
+	C: HeaderBackend<B> + Finalizer<B, CB> + ProvideRuntimeApi<B> + BlockchainEvents<B> + 'static,
+	S: SpawnNamed,
+{
+	let mut block_import_stream = client.import_notification_stream();
+
+	while let Some(notification) = block_import_stream.next().await {
+		let delay = Delay::new(Duration::from_secs(delay_sec));
+		let cloned_client = client.clone();
+		spawn_handle.spawn(
+			"delayed-finalize",
+			None,
+			Box::pin(async move {
+				delay.await;
+				finalize_block(FinalizeBlockParams {
+					hash: notification.hash,
+					sender: None,
+					justification: None,
+					finalizer: cloned_client,
+					_phantom: PhantomData,
+				})
+				.await
+			}),
+		);
+	}
 }
 
 #[cfg(test)]

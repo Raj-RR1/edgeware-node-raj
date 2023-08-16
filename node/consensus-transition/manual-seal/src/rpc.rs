@@ -23,6 +23,10 @@ use futures::{
 	channel::{mpsc, oneshot},
 	FutureExt, SinkExt, TryFutureExt,
 };
+use jsonrpsee::{
+	core::{async_trait, Error as JsonRpseeError, RpcResult},
+	proc_macros::rpc,
+};
 use jsonrpc_core::Error;
 use jsonrpc_derive::rpc;
 use sc_consensus::ImportedAux;
@@ -30,7 +34,8 @@ use serde::{Deserialize, Serialize};
 use sp_runtime::EncodedJustification;
 
 /// Future's type for jsonrpc
-type FutureResult<T> = jsonrpc_core::BoxFuture<Result<T, Error>>;
+//type FutureResult<T> = jsonrpc_core::BoxFuture<Result<T, Error>>;
+
 /// sender passed to the authorship task to report errors or successes.
 pub type Sender<T> = Option<oneshot::Sender<std::result::Result<T, crate::Error>>>;
 
