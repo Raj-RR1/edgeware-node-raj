@@ -288,6 +288,12 @@ pub fn testnet_genesis(
 			current_payout: 95 * DOLLARS,
 			minting_interval: One::one(),
 		},
+		nomination_pools: edgeware_runtime::NominationPoolsConfig {
+			max_pools: Some(84),
+			min_join_bond: EDG,
+			min_create_bond: 100 * EDG,
+			..Default::default()
+		},
 	}
 }
 
