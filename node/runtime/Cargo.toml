@@ -71,6 +71,7 @@ pallet-elections-phragmen = { git = "https://github.com/paritytech/substrate", b
 frame-executive = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.19", default-features = false }
 pallet-grandpa = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.19", default-features = false }
 pallet-identity = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.19", default-features = false }
+pallet-nomination-pools = { git = "https://github.com/paritytech/substrate", default-features = false , branch = "polkadot-v0.9.20" }
 pallet-im-online = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.19", default-features = false }
 pallet-indices = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.19", default-features = false }
 pallet-multisig = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.19", default-features = false }
@@ -127,6 +128,7 @@ getrandom = { version = "0.2", features = ["js"] }
 # used for runtime benchmarking
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.19", default-features = false, optional = true }
 frame-system-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.19", default-features = false, optional = true }
+pallet-nomination-pools-benchmarking = { git = "https://github.com/paritytech/substrate", default-features = false, optional = true , branch = "polkadot-v0.9.20" }
 hex-literal = "0.3.4"
 
 [build-dependencies]
@@ -161,6 +163,7 @@ std = [
 	"frame-executive/std",
 	"pallet-grandpa/std",
 	"pallet-identity/std",
+	"pallet-nomination-pools/std",
 	"pallet-im-online/std",
 	"pallet-indices/std",
 	"pallet-multisig/std",
@@ -235,4 +238,5 @@ runtime-benchmarks = [
 	"frame-support/runtime-benchmarks",
 	"frame-system/runtime-benchmarks",
 	"frame-system-benchmarking",
+	"pallet-nomination-pools-benchmarking",
 ]
