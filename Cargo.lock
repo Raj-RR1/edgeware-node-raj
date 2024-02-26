@@ -1310,6 +1310,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "derivative"
+version = "2.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fcc3dd5e9e9c0b295d6e1e4d811fb6f157d5ffd784b8d202fc62eac8035a770b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "derive_more"
 version = "0.99.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1518,7 +1529,7 @@ dependencies = [
  "fc-rpc",
  "fc-rpc-core",
  "fp-consensus",
- "fp-evm",
+ "fp-evm 3.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
  "fp-rpc",
  "frame-benchmarking-cli",
  "frame-support",
@@ -1534,7 +1545,7 @@ dependencies = [
  "pallet-balances",
  "pallet-contracts",
  "pallet-dynamic-fee",
- "pallet-evm",
+ "pallet-evm 6.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
  "pallet-grandpa",
  "pallet-im-online",
  "pallet-indices",
@@ -1922,11 +1933,12 @@ dependencies = [
  "pallet-contracts-primitives",
  "pallet-contracts-rpc-runtime-api",
  "pallet-democracy",
+ "pallet-democracy-precompiles",
  "pallet-dynamic-fee",
  "pallet-election-provider-multi-phase",
  "pallet-elections-phragmen",
  "pallet-ethereum",
- "pallet-evm",
+ "pallet-evm 6.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
  "pallet-evm-precompile-blake2",
  "pallet-evm-precompile-bn128",
  "pallet-evm-precompile-curve25519",
@@ -2520,13 +2532,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "fp-evm"
+version = "3.0.0-dev"
+source = "git+https://github.com/polkadot-evm/frontier?branch=polkadot-v0.9.19#7c32b1401d94ca46abc6ac9fed2006ff4803b766"
+dependencies = [
+ "evm 0.35.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "parity-scale-codec",
+ "serde",
+ "sp-core",
+ "sp-std",
+]
+
+[[package]]
 name = "fp-rpc"
 version = "3.0.0-dev"
 source = "git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19#7c32b1401d94ca46abc6ac9fed2006ff4803b766"
 dependencies = [
  "ethereum",
  "ethereum-types",
- "fp-evm",
+ "fp-evm 3.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
  "parity-scale-codec",
  "scale-info",
  "sp-api",
@@ -5311,7 +5335,7 @@ name = "pallet-base-fee"
 version = "1.0.0"
 source = "git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19#7c32b1401d94ca46abc6ac9fed2006ff4803b766"
 dependencies = [
- "fp-evm",
+ "fp-evm 3.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
  "frame-support",
  "frame-system",
  "parity-scale-codec",
@@ -5473,13 +5497,40 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-democracy-precompiles"
+version = "0.2.0"
+dependencies = [
+ "derive_more",
+ "fp-evm 3.0.0-dev (git+https://github.com/polkadot-evm/frontier?branch=polkadot-v0.9.19)",
+ "frame-support",
+ "frame-system",
+ "hex-literal",
+ "log",
+ "num_enum",
+ "pallet-balances",
+ "pallet-democracy",
+ "pallet-evm 6.0.0-dev (git+https://github.com/polkadot-evm/frontier?branch=polkadot-v0.9.19)",
+ "pallet-scheduler",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "precompile-utils",
+ "scale-info",
+ "serde",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+ "tiny-keccak",
+]
+
+[[package]]
 name = "pallet-dynamic-fee"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19#7c32b1401d94ca46abc6ac9fed2006ff4803b766"
 dependencies = [
  "async-trait",
  "fp-dynamic-fee",
- "fp-evm",
+ "fp-evm 3.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
  "frame-support",
  "frame-system",
  "parity-scale-codec",
@@ -5540,14 +5591,14 @@ dependencies = [
  "ethereum-types",
  "evm 0.35.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "fp-consensus",
- "fp-evm",
+ "fp-evm 3.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
  "fp-rpc",
  "fp-self-contained",
  "fp-storage",
  "frame-support",
  "frame-system",
  "pallet-balances",
- "pallet-evm",
+ "pallet-evm 6.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
  "pallet-timestamp",
  "parity-scale-codec",
  "rlp",
@@ -5565,7 +5616,33 @@ version = "6.0.0-dev"
 source = "git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19#7c32b1401d94ca46abc6ac9fed2006ff4803b766"
 dependencies = [
  "evm 0.35.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "fp-evm",
+ "fp-evm 3.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
+ "frame-benchmarking",
+ "frame-support",
+ "frame-system",
+ "hex 0.4.3",
+ "log",
+ "pallet-balances",
+ "pallet-timestamp",
+ "parity-scale-codec",
+ "primitive-types",
+ "rlp",
+ "scale-info",
+ "serde",
+ "sha3 0.10.1",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
+name = "pallet-evm"
+version = "6.0.0-dev"
+source = "git+https://github.com/polkadot-evm/frontier?branch=polkadot-v0.9.19#7c32b1401d94ca46abc6ac9fed2006ff4803b766"
+dependencies = [
+ "evm 0.35.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "fp-evm 3.0.0-dev (git+https://github.com/polkadot-evm/frontier?branch=polkadot-v0.9.19)",
  "frame-benchmarking",
  "frame-support",
  "frame-system",
@@ -5590,7 +5667,7 @@ name = "pallet-evm-precompile-blake2"
 version = "2.0.0-dev"
 source = "git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19#7c32b1401d94ca46abc6ac9fed2006ff4803b766"
 dependencies = [
- "fp-evm",
+ "fp-evm 3.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
 ]
 
 [[package]]
@@ -5598,7 +5675,7 @@ name = "pallet-evm-precompile-bn128"
 version = "2.0.0-dev"
 source = "git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19#7c32b1401d94ca46abc6ac9fed2006ff4803b766"
 dependencies = [
- "fp-evm",
+ "fp-evm 3.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
  "sp-core",
  "substrate-bn",
 ]
@@ -5609,7 +5686,7 @@ version = "1.0.0-dev"
 source = "git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19#7c32b1401d94ca46abc6ac9fed2006ff4803b766"
 dependencies = [
  "curve25519-dalek 4.0.0-pre.1",
- "fp-evm",
+ "fp-evm 3.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
 ]
 
 [[package]]
@@ -5617,9 +5694,9 @@ name = "pallet-evm-precompile-dispatch"
 version = "2.0.0-dev"
 source = "git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19#7c32b1401d94ca46abc6ac9fed2006ff4803b766"
 dependencies = [
- "fp-evm",
+ "fp-evm 3.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
  "frame-support",
- "pallet-evm",
+ "pallet-evm 6.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
 ]
 
 [[package]]
@@ -5628,7 +5705,7 @@ version = "2.0.0-dev"
 source = "git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19#7c32b1401d94ca46abc6ac9fed2006ff4803b766"
 dependencies = [
  "ed25519-dalek",
- "fp-evm",
+ "fp-evm 3.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
 ]
 
 [[package]]
@@ -5636,7 +5713,7 @@ name = "pallet-evm-precompile-modexp"
 version = "2.0.0-dev"
 source = "git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19#7c32b1401d94ca46abc6ac9fed2006ff4803b766"
 dependencies = [
- "fp-evm",
+ "fp-evm 3.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
  "num",
 ]
 
@@ -5645,7 +5722,7 @@ name = "pallet-evm-precompile-sha3fips"
 version = "2.0.0-dev"
 source = "git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19#7c32b1401d94ca46abc6ac9fed2006ff4803b766"
 dependencies = [
- "fp-evm",
+ "fp-evm 3.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
  "tiny-keccak",
 ]
 
@@ -5654,7 +5731,7 @@ name = "pallet-evm-precompile-simple"
 version = "2.0.0-dev"
 source = "git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19#7c32b1401d94ca46abc6ac9fed2006ff4803b766"
 dependencies = [
- "fp-evm",
+ "fp-evm 3.0.0-dev (git+https://github.com/paritytech/frontier?branch=polkadot-v0.9.19)",
  "ripemd",
  "sp-io",
 ]
@@ -6445,6 +6522,38 @@ name = "ppv-lite86"
 version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "eb9f9e6e233e5c4a35559a617bf40a4ec447db2e84c20b55a6f83167b7e57872"
+
+[[package]]
+name = "precompile-utils"
+version = "0.1.0"
+dependencies = [
+ "fp-evm 3.0.0-dev (git+https://github.com/polkadot-evm/frontier?branch=polkadot-v0.9.19)",
+ "frame-support",
+ "frame-system",
+ "hex-literal",
+ "impl-trait-for-tuples",
+ "log",
+ "num_enum",
+ "pallet-evm 6.0.0-dev (git+https://github.com/polkadot-evm/frontier?branch=polkadot-v0.9.19)",
+ "parity-scale-codec",
+ "precompile-utils-macro",
+ "sha3 0.9.1",
+ "sp-core",
+ "sp-io",
+ "sp-std",
+ "xcm",
+]
+
+[[package]]
+name = "precompile-utils-macro"
+version = "0.1.0"
+dependencies = [
+ "num_enum",
+ "proc-macro2",
+ "quote",
+ "sha3 0.8.2",
+ "syn",
+]
 
 [[package]]
 name = "predicates"
@@ -8328,6 +8437,19 @@ dependencies = [
  "cfg-if 1.0.0",
  "cpufeatures 0.2.2",
  "digest 0.10.3",
+]
+
+[[package]]
+name = "sha3"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dd26bc0e7a2e3a7c959bc494caf58b72ee0c71d67704e9520f736ca7e4853ecf"
+dependencies = [
+ "block-buffer 0.7.3",
+ "byte-tools",
+ "digest 0.8.1",
+ "keccak",
+ "opaque-debug 0.2.3",
 ]
 
 [[package]]
@@ -10719,6 +10841,30 @@ dependencies = [
  "curve25519-dalek 3.2.0",
  "rand_core 0.5.1",
  "zeroize",
+]
+
+[[package]]
+name = "xcm"
+version = "0.9.19"
+source = "git+https://github.com/paritytech/polkadot?branch=release-v0.9.19#f00a2772497aadddf75b8b4b475843ea0d910c48"
+dependencies = [
+ "derivative",
+ "impl-trait-for-tuples",
+ "log",
+ "parity-scale-codec",
+ "scale-info",
+ "xcm-procedural",
+]
+
+[[package]]
+name = "xcm-procedural"
+version = "0.1.0"
+source = "git+https://github.com/paritytech/polkadot?branch=release-v0.9.19#f00a2772497aadddf75b8b4b475843ea0d910c48"
+dependencies = [
+ "Inflector",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

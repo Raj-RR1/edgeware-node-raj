@@ -9,7 +9,9 @@ use pallet_evm_precompile_ed25519::Ed25519Verify;
 use pallet_evm_precompile_modexp::Modexp;
 use pallet_evm_precompile_sha3fips::Sha3FIPS256;
 use pallet_evm_precompile_simple::{ECRecover, ECRecoverPublicKey, Identity, Ripemd160, Sha256};
+use pallet_democracy_precompiles::DemocracyWrapper;
 
+#[derive(Debug, Clone, Copy)]
 pub struct EdgewarePrecompiles<R>(PhantomData<R>);
 
 impl<R> EdgewarePrecompiles<R>
@@ -21,7 +23,7 @@ where
 	}
 
 	pub fn used_addresses() -> sp_std::vec::Vec<H160> {
-		sp_std::vec![1, 2, 3, 4, 5, 1024, 1025, 1026, 1027, 1028]
+		sp_std::vec![1, 2, 3, 4, 5, 1024, 1025, 1026, 1027, 1028, 2051]
 			.into_iter()
 			.map(|x| hash(x))
 			.collect()
@@ -29,7 +31,8 @@ where
 }
 impl<R> PrecompileSet for EdgewarePrecompiles<R>
 where
-	R: pallet_evm::Config,
+    R: pallet_evm::Config,
+	DemocracyWrapper<R>: Precompile,
 {
 	fn execute(
 		&self,
@@ -56,6 +59,9 @@ where
 			a if a == hash(1026) => Some(Ed25519Verify::execute(input, target_gas, context, is_static)),
 			a if a == hash(1027) => Some(Curve25519Add::execute(input, target_gas, context, is_static)),
 			a if a == hash(1028) => Some(Curve25519ScalarMul::execute(input, target_gas, context, is_static)),
+			a if a == hash(2051) => Some(DemocracyWrapper::<R>::execute(
+				input, target_gas, context, is_static,
+			)),
 			_ => None,
 		}
 	}

@@ -20,6 +20,8 @@ members = [
 	"primitives/rpc/txpool",
 	"utils/frame/generate-bags",
 	"utils/frame/generate-bags/node-runtime",
+	"precompiles/utils",
+	"precompiles/pallet-democracy",
 ]
 exclude = ["vendor"]
 

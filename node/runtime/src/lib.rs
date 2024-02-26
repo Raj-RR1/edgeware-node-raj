@@ -87,6 +87,8 @@ pub use pallet_staking::StakerStatus;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 
+pub type Precompiles = EdgewarePrecompiles<Runtime>;
+
 /// Implementations of some helper traits passed into runtime modules as associated types.
 pub mod impls;
 //use impls::{Author, CreditToBlockAuthor};
