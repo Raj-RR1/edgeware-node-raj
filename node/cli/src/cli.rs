@@ -139,4 +139,6 @@ pub enum Subcommand {
 
 	/// Revert the chain to a previous state.
 	Revert(sc_cli::RevertCmd),
+
+	ChainInfo(sc_cli::ChainInfoCmd),
 }

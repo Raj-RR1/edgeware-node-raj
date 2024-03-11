@@ -146,6 +146,10 @@ pub fn run() -> Result<()> {
 				Ok((cmd.run(client, backend, Some(aux_revert)), task_manager))
 			})
 		}
+		Some(Subcommand::ChainInfo(cmd)) => {
+			let runner = cli.create_runner(cmd)?;
+			Ok(runner.sync_run(|config| cmd.run::<service::Block>(&config))?)
+		},
 		None => {
 			let runner = cli.create_runner(&cli.run.base)?;
 
