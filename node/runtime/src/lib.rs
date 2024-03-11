@@ -707,6 +707,10 @@ impl onchain::BoundedExecutionConfig for OnChainSeqPhragmen {
 	type TargetsBound = ConstU32<2_000>;
 }
 
+parameter_types!{
+	pub const SignedMaxRefunds: u32 = 16 / 4;
+}
+
 impl pallet_election_provider_multi_phase::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
@@ -720,6 +724,7 @@ impl pallet_election_provider_multi_phase::Config for Runtime {
 	type MinerMaxLength = MinerMaxLength;
 	type MinerTxPriority = MultiPhaseUnsignedPriority;
 	type SignedMaxSubmissions = ConstU32<10>;
+	type SignedMaxRefunds = SignedMaxRefunds;
 	type SignedRewardBase = SignedRewardBase;
 	type SignedDepositBase = SignedDepositBase;
 	type SignedDepositByte = SignedDepositByte;
