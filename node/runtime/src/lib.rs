@@ -695,16 +695,17 @@ impl Get<Option<(usize, ExtendedBalance)>> for OffchainRandomBalancing {
 }
 
 pub struct OnChainSeqPhragmen;
-impl onchain::ExecutionConfig for OnChainSeqPhragmen {
+impl onchain::Config for OnChainSeqPhragmen {
 	type System = Runtime;
 	type Solver = SequentialPhragmen<
 		AccountId,
 		pallet_election_provider_multi_phase::SolutionAccuracyOf<Runtime>,
 	>;
 	type DataProvider = <Runtime as pallet_election_provider_multi_phase::Config>::DataProvider;
+	type WeightInfo = ();
 }
 
-impl onchain::BoundedExecutionConfig for OnChainSeqPhragmen {
+impl onchain::BoundedConfig for OnChainSeqPhragmen {
 	type VotersBound = ConstU32<20_000>;
 	type TargetsBound = ConstU32<2_000>;
 }
@@ -2074,6 +2075,7 @@ impl_runtime_apis! {
 			use frame_benchmarking::{list_benchmark, Benchmarking, BenchmarkList};
 			use frame_support::traits::StorageInfoTrait;
 			use frame_system_benchmarking::Pallet as SystemBench;
+			use pallet_election_provider_support_benchmarking::Pallet as ElectionProviderBench;
 
 			let mut list = Vec::<BenchmarkList>::new();
 
@@ -2091,7 +2093,9 @@ impl_runtime_apis! {
 			use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark, TrackedStorageKey};
 
 			use frame_system_benchmarking::Pallet as SystemBench;
+			use pallet_election_provider_support_benchmarking::Pallet as ElectionProviderBench;
 			impl frame_system_benchmarking::Config for Runtime {}
+			impl pallet_election_provider_support_benchmarking::Config for Runtime {}
 
 			let whitelist: Vec<TrackedStorageKey> = vec![
 				// Block Number

@@ -128,6 +128,7 @@ getrandom = { version = "0.2", features = ["js"] }
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.22", default-features = false, optional = true }
 frame-system-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.22", default-features = false, optional = true }
 hex-literal = "0.3.4"
+pallet-election-provider-support-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.22", default-features = false, optional = true }
 
 [build-dependencies]
 substrate-wasm-builder = { package = "substrate-wasm-builder", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.22" }
@@ -235,4 +236,5 @@ runtime-benchmarks = [
 	"frame-support/runtime-benchmarks",
 	"frame-system/runtime-benchmarks",
 	"frame-system-benchmarking",
+	"pallet-election-provider-support-benchmarking/runtime-benchmarks",
 ]
