@@ -31,7 +31,7 @@ serde = { version = "1.0", features = ["derive"] }
 futures = { version = "0.3.1", features = ["compat"] }
 hex-literal = "0.3.1"
 jsonrpsee = { version = "0.13.0", features = ["server", "macros"] }
-log = "0.4.8"
+log = "0.4.17"
 maplit = "1.0.2"
 rand = "0.7.2"
 #structopt = { version = "0.3.8", features=["paw"] }
