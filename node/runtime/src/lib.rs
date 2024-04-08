@@ -64,8 +64,7 @@ use sp_runtime::{
 	curve::PiecewiseLinear,
 	generic, impl_opaque_keys,
 	traits::{
-		self, BlakeTwo256, Block as BlockT, ConvertInto, Dispatchable, NumberFor,
-		OpaqueKeys, PostDispatchInfoOf, SaturatedConversion, StaticLookup,
+		self, BlakeTwo256, Block as BlockT, ConvertInto, DispatchInfoOf, Dispatchable, NumberFor, OpaqueKeys, PostDispatchInfoOf, SaturatedConversion, StaticLookup
 	},
 	transaction_validity::{TransactionPriority, TransactionSource, TransactionValidity, TransactionValidityError},
 	ApplyExtrinsicResult, FixedPointNumber, Perbill, Percent, Permill, Perquintill,
@@ -1151,7 +1150,7 @@ impl pallet_contracts::Config for Runtime {
 	type DeletionWeightLimit = DeletionWeightLimit;
 	type Schedule = Schedule;
 	type AddressGenerator = pallet_contracts::DefaultAddressGenerator;
-}
+	}
 
 impl pallet_sudo::Config for Runtime {
 	type Event = Event;
@@ -1608,9 +1607,9 @@ impl fp_self_contained::SelfContainedCall for Call {
 		}
 	}
 
-	fn validate_self_contained(&self, info: &Self::SignedInfo) -> Option<TransactionValidity> {
+	fn validate_self_contained(&self, info: &Self::SignedInfo, dispatch_info: &DispatchInfoOf<Call>,len: usize) -> Option<TransactionValidity> {
 		match self {
-			Call::Ethereum(call) => call.validate_self_contained(info),
+			Call::Ethereum(call) => call.validate_self_contained(info, dispatch_info, len),
 			_ => None,
 		}
 	}
