@@ -367,8 +367,6 @@ pub fn new_full_base(mut config: Configuration,
 	let name = config.network.node_name.clone();
 	let enable_grandpa = !config.disable_grandpa;
 	let prometheus_registry = config.prometheus_registry().cloned();
-	let subscription_task_executor =
-		sc_rpc::SubscriptionTaskExecutor::new(task_manager.spawn_handle());
 	let fee_history_cache: fc_rpc_core::types::FeeHistoryCache = Arc::new(Mutex::new(BTreeMap::new()));
 	let fee_history_cache_limit = cli.run.fee_history_limit;
 	let overrides = edgeware_rpc::overrides_handle(client.clone());
@@ -474,17 +472,22 @@ pub fn new_full_base(mut config: Configuration,
 			block_data_cache: block_data_cache.clone(),
 			command_sink: None,
 		};
-		#[allow(unused_mut)]
-		let mut io = edgeware_rpc::create_full(deps, subscription_task_executor.clone());
+
 		if ethapi_cmd.contains(&EthApiCmd::Debug) || ethapi_cmd.contains(&EthApiCmd::Trace) {
-			edgeware_rpc::tracing::extend_with_tracing(
-				clt.clone(),
-				tracing_requesters.clone(),
-				rpc_config.ethapi_trace_max_count,
-				&mut io,
-			);
+			edgeware_rpc::create_full(
+				deps,
+				subscription_executor,
+				Some(edgeware_rpc::TracingConfig {
+					tracing_requesters: tracing_requesters.clone(),
+					trace_filter_max_count: rpc_config.ethapi_trace_max_count,
+				}),
+			)
+			.map_err(Into::into)
 		}
-		Ok(io)
+		else{
+			edgeware_rpc::create_full(deps, subscription_executor, None).map_err(Into::into)
+		}
+	
 	};
 
 	let rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
@@ -494,7 +497,7 @@ pub fn new_full_base(mut config: Configuration,
 		task_manager: &mut task_manager,
 		keystore: keystore,
 		transaction_pool: transaction_pool.clone(),
-		rpc_extensions_builder: Box::new(rpc_extensions_builder),
+		rpc_builder: Box::new(rpc_extensions_builder),
 		network: network.clone(),
 		system_rpc_tx: system_rpc_tx,
 		telemetry: telemetry.as_mut(),
