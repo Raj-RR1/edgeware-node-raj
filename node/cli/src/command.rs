@@ -148,7 +148,7 @@ pub fn run() -> Result<()> {
 		}
 		Some(Subcommand::ChainInfo(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
-			Ok(runner.sync_run(|config| cmd.run::<service::Block>(&config))?)
+			Ok(runner.sync_run(|config| cmd.run::<edgeware_primitives::Block>(&config))?)
 		},
 		None => {
 			let runner = cli.create_runner(&cli.run.base)?;
