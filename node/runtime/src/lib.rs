@@ -1635,6 +1635,7 @@ impl fp_self_contained::SelfContainedCall for Call {
 	}
 }
 
+
 impl_runtime_apis! {
 	impl sp_api::Core<Block> for Runtime {
 		fn version() -> RuntimeVersion {
@@ -2078,7 +2079,6 @@ impl_runtime_apis! {
 			use frame_benchmarking::{list_benchmark, Benchmarking, BenchmarkList};
 			use frame_support::traits::StorageInfoTrait;
 			use frame_system_benchmarking::Pallet as SystemBench;
-			use pallet_election_provider_support_benchmarking::Pallet as ElectionProviderBench;
 
 			let mut list = Vec::<BenchmarkList>::new();
 
@@ -2096,9 +2096,7 @@ impl_runtime_apis! {
 			use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark, TrackedStorageKey};
 
 			use frame_system_benchmarking::Pallet as SystemBench;
-			use pallet_election_provider_support_benchmarking::Pallet as ElectionProviderBench;
 			impl frame_system_benchmarking::Config for Runtime {}
-			impl pallet_election_provider_support_benchmarking::Config for Runtime {}
 
 			let whitelist: Vec<TrackedStorageKey> = vec![
 				// Block Number
