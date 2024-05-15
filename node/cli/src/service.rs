@@ -34,7 +34,7 @@ use sc_network::{Event, NetworkService};
 use sc_service::{config::{Configuration, /*PrometheusConfig*/}, error::Error as ServiceError, RpcHandlers,BasePath, ChainSpec, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryWorker, TelemetryWorkerHandle};
 //use sp_consensus::SlotData;
-use sp_core::U256;
+use sp_core::{traits::SpawnNamed, U256};
 use sp_runtime::traits::Block as BlockT;
 use std::{
 	collections::BTreeMap,
@@ -443,7 +443,7 @@ pub fn new_full_base(mut config: Configuration,
 	let clt = client.clone();
 	let ntw = network.clone();
 	let svs = shared_voter_state.clone();
-	let rpc_extensions_builder = move |deny_unsafe, subscription_executor| {
+	let rpc_extensions_builder = move |deny_unsafe, subscription_executor: Arc<dyn SpawnNamed>| {
 		let deps = edgeware_rpc::FullDeps {
 			client: clt.clone(),
 			pool: pool.clone(),
@@ -454,7 +454,7 @@ pub fn new_full_base(mut config: Configuration,
 				shared_voter_state: svs.clone(),
 				shared_authority_set: shared_authority_set.clone(),
 				justification_stream: justification_stream.clone(),
-				subscription_executor,
+				subscription_executor: subscription_executor.clone(),
 				finality_provider: finality_proof_provider.clone(),
 			},
 			// Frontier
