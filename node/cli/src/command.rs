@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Edgeware.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{chain_spec, service, service::new_partial, Cli, Subcommand};
+use crate::{chain_spec, service::{self, new_partial, IdentifyVariant}, Cli, Subcommand};
 use edgeware_cli_opt::RpcConfig;
 use frame_benchmarking_cli::{BenchmarkCmd, SUBSTRATE_REFERENCE_HARDWARE};
 use sc_cli::{ChainSpec, Result, RuntimeVersion, SubstrateCli};
