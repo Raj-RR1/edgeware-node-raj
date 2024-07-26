@@ -1594,6 +1594,45 @@ pub type Executive =
 
 pub type Extrinsic = <Block as BlockT>::Extrinsic;
 
+#[cfg(feature = "runtime-benchmarks")]
+#[macro_use]
+extern crate frame_benchmarking;
+
+#[cfg(feature = "runtime-benchmarks")]
+mod benches {
+	define_benchmarks!(
+		[frame_system, SystemBench::<Runtime>]
+		[pallet_utility, Utility]
+		[pallet_multisig, Multisig]
+		[pallet_proxy, Proxy]
+		[pallet_scheduler, Scheduler]
+		[pallet_preimage, Preimage]
+		[pallet_indices, Indices]
+		[pallet_balances, Balances]
+		[frame_benchmarking::baseline, Baseline::<Runtime>]
+		// [pallet_timestamp, Timestamp]
+		// [pallet_session, SessionBench::<Runtime>]
+		// [pallet_staking, Staking]
+		// [pallet_election_provider_multi_phase, ElectionProviderMultiPhase]
+		// [pallet_bags_list, BagsList]
+		// [pallet_conviction_voting, ConvictionVoting]
+		// [pallet_referenda, Referenda]
+		// [pallet_democracy, Democracy]
+		// [pallet_collective, Council]
+		// [pallet_elections_phragmen, PhragmenElection]
+		// [pallet_treasury, Treasury]
+		// [pallet_bounties, Bounties]
+		// [pallet_tips, Tips]
+		// [pallet_contracts, Contracts]
+		// [pallet_im_online, ImOnline]
+		// [pallet_identity, Identity]
+		// [pallet_recovery, Recovery]
+		// [pallet_vesting, Vesting]
+		// [pallet_assets, Assets]
+
+	);
+}
+
 impl fp_self_contained::SelfContainedCall for Call {
 	type SignedInfo = H160;
 
@@ -2081,6 +2120,7 @@ impl_runtime_apis! {
 			use frame_benchmarking::{list_benchmark, Benchmarking, BenchmarkList};
 			use frame_support::traits::StorageInfoTrait;
 			use frame_system_benchmarking::Pallet as SystemBench;
+			use frame_benchmarking::baseline::Pallet as Baseline;
 
 			let mut list = Vec::<BenchmarkList>::new();
 
@@ -2098,7 +2138,9 @@ impl_runtime_apis! {
 			use frame_benchmarking::{Benchmarking, BenchmarkBatch, add_benchmark, TrackedStorageKey};
 
 			use frame_system_benchmarking::Pallet as SystemBench;
+			use frame_benchmarking::baseline::Pallet as Baseline;
 			impl frame_system_benchmarking::Config for Runtime {}
+			impl frame_benchmarking::baseline::Config for Runtime {}
 
 			let whitelist: Vec<TrackedStorageKey> = vec![
 				// Block Number
