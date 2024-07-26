@@ -72,10 +72,10 @@ pub type ConsensusResult = (
 /// Can be called for a `Configuration` to check if it is a configuration for
 /// the `Kusama` network.
 pub trait IdentifyVariant {
-	/// Returns if this is a configuration for the `Kusama` network.
+	/// Returns if this is a configuration for the `edgeware` network.
 	fn is_mainnet(&self) -> bool;
 
-	/// Returns if this is a configuration for the `Westend` network.
+	/// Returns if this is a configuration for the `beresheet` network.
 	fn is_beresheet(&self) -> bool;
 }
 
