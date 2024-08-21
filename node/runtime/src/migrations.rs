@@ -10,6 +10,21 @@ impl OnRuntimeUpgrade for MigratePalletVersionToStorageVersion {
     }
 }
 
+/// A migration which renames the pallet `BagsList` to `VoterList`
+pub struct RenameBagsListToVoterList;
+impl OnRuntimeUpgrade for RenameBagsListToVoterList {
+#[cfg(feature="try-runtime")]
+fn pre_upgrade() -> Result<(),&'static str>{
+  frame_support::storage::migration::move_pallet(b"BagsList", b"VoterList");
+Ok(())
+}
+fn on_runtime_upgrade() -> frame_support::weights::Weight {
+  frame_support::storage::migration::move_pallet(b"BagsList", b"VoterList");
+  frame_support::weights::Weight::MAX
+}
+
+}
+
 /// Phragmen deposit upgrade
 const OLD_CANDIDACY_BOND: Balance = 1000 * DOLLARS;
 const OLD_VOTING_BOND: Balance = 10 * DOLLARS;
@@ -327,6 +342,10 @@ impl OnRuntimeUpgrade for AllEdgewareMigrations {
         frame_support::log::info!("💥 Web3AccountCreditMigration start");
         weight += <Web3AccountCreditMigration as OnRuntimeUpgrade>::on_runtime_upgrade();
         frame_support::log::info!("😎 Web3AccountCreditMigration end");
+
+        frame_support::log::info!("💥 RenameBagsListToVoterList start");
+        weight += <RenameBagsListToVoterList as OnRuntimeUpgrade>::on_runtime_upgrade();
+        frame_support::log::info!("😎 RenameBagsListToVoterList end");
 
         weight
     }

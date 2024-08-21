@@ -46,6 +46,7 @@ use frame_system::{
 };
 pub use edgeware_primitives::{AccountId, Signature};
 use edgeware_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment,/* Nonce*/};
+use migrations::AllEdgewareMigrations;
 use pallet_contracts::weights::WeightInfo;
 use pallet_election_provider_multi_phase::SolutionAccuracyOf;
 use pallet_grandpa::{
@@ -608,7 +609,7 @@ impl pallet_staking::Config for Runtime {
 	type OffendingValidatorsThreshold = OffendingValidatorsThreshold;
 	type ElectionProvider = ElectionProviderMultiPhase;
 	type GenesisElectionProvider = onchain::UnboundedExecution<OnChainSeqPhragmen>;
-	type VoterList = BagsList;
+	type VoterList = VoterList;
 	type MaxUnlockingChunks = ConstU32<32>;
 	type OnStakerSlash = ();
 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
@@ -1526,7 +1527,7 @@ construct_runtime!(
 		ElectionProviderMultiPhase: pallet_election_provider_multi_phase = 39,
 		DynamicFee: pallet_dynamic_fee = 40,
 		BaseFee: pallet_base_fee = 41,
-		BagsList: pallet_bags_list = 42,
+		VoterList: pallet_bags_list = 42,
 		Preimage: pallet_preimage = 43,
 //		Referenda: pallet_referenda,
 //		ConvictionVoting: pallet_conviction_voting,
@@ -1590,7 +1591,7 @@ pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExt
 
 /// Executive: handles dispatch to the various modules.
 pub type Executive =
-	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem, ()>;
+	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem, AllEdgewareMigrations>;
 
 pub type Extrinsic = <Block as BlockT>::Extrinsic;
 
