@@ -45,7 +45,7 @@ sp-timestamp = { git = "https://github.com/paritytech/substrate", branch = "polk
 prometheus-endpoint = { package = "substrate-prometheus-endpoint", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.22", default-features = false }
 
 [dev-dependencies]
-tokio = { version = "1.17.0", features = ["rt-multi-thread", "macros"] }
+tokio = { version = "1.18.2", features = ["rt-multi-thread", "macros"] }
 sc-basic-authorship = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.22", default-features = false }
 substrate-test-runtime-client = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.22", default-features = false }
 substrate-test-runtime-transaction-pool = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.22", default-features = false }
