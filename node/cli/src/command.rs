@@ -97,7 +97,7 @@ pub fn run() -> Result<()> {
 						Err("Benchmarking wasn't enabled when building the node. \
 					You can enable it with `--features runtime-benchmarks`."
 							.into())
-					}	
+					}
 				}
 				BenchmarkCmd::Block(cmd) => {
 					if chain_spec.is_mainnet(){
@@ -128,7 +128,7 @@ pub fn run() -> Result<()> {
 				BenchmarkCmd::Machine(cmd) => {
                     return runner
                         .sync_run(|config| cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone()));
-                }				
+                }
 			}
 		}
 		Some(Subcommand::Key(cmd)) => cmd.run(&cli),
@@ -213,6 +213,7 @@ pub fn run() -> Result<()> {
 				fee_history_limit: cli.run.fee_history_limit,
 				max_past_logs: cli.run.max_past_logs,
 				relay_chain_rpc_url: None,
+				tracing_raw_max_memory_usage: cli.run.tracing_raw_max_memory_usage,
 			};
 
 			runner.run_node_until_exit(|config| async move {
