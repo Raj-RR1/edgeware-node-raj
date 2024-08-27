@@ -26,19 +26,13 @@
 use codec::{Decode, Encode, MaxEncodedLen};
 use frame_election_provider_support::{onchain, ExtendedBalance, SequentialPhragmen, VoteWeight};
 use frame_support::{
-	construct_runtime,
-	pallet_prelude::Get,
-	parameter_types,
-	traits::{
-		/*AsEnsureOriginWithArg,*/ ConstU128, ConstU16, ConstU32, Currency, EnsureOneOf,
-		EqualPrivilegeOnly, Everything, Imbalance, InstanceFilter, KeyOwnerProofSystem,
-		LockIdentifier, Nothing, OnUnbalanced, U128CurrencyToVote, FindAuthor,
-	},
-	weights::{
-		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
+	construct_runtime, pallet_prelude::Get, parameter_types, traits::{
+		/*AsEnsureOriginWithArg,*/ ConstU128, ConstU16, ConstU32, Currency, EnsureOneOf, EqualPrivilegeOnly, Everything, FindAuthor, Imbalance, InstanceFilter, KeyOwnerProofSystem, LockIdentifier, Nothing, OnUnbalanced, U128CurrencyToVote
+	}, weights::{
+		constants::{
+		BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
 		ConstantMultiplier, DispatchClass, IdentityFee, Weight,
-	},
-	PalletId, RuntimeDebug, ConsensusEngineId,
+	}, ConsensusEngineId, PalletId, RuntimeDebug
 };
 use frame_system::{
 	limits::{BlockLength, BlockWeights},
@@ -48,7 +42,7 @@ pub use edgeware_primitives::{AccountId, Signature};
 use edgeware_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment,/* Nonce*/};
 use migrations::AllEdgewareMigrations;
 use pallet_contracts::weights::WeightInfo;
-use pallet_election_provider_multi_phase::SolutionAccuracyOf;
+use pallet_election_provider_multi_phase::{MinerConfig, SolutionAccuracyOf};
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
@@ -716,6 +710,18 @@ parameter_types!{
 	pub const SignedMaxRefunds: u32 = 16 / 4;
 }
 
+impl pallet_election_provider_multi_phase::MinerConfig for Runtime{
+type AccountId = AccountId;
+type MaxLength = MinerMaxLength;
+type MaxWeight = MinerMaxWeight;
+type Solution = NposSolution16;
+type MaxVotesPerVoter = <<Self as pallet_election_provider_multi_phase::Config>::DataProvider as frame_election_provider_support::ElectionDataProvider>::MaxVotesPerVoter;
+fn solution_weight(voters: u32, targets: u32, active_voters: u32, degree: u32) -> Weight {
+    <<Self as pallet_election_provider_multi_phase::Config>::WeightInfo as pallet_election_provider_multi_phase::WeightInfo>::submit_unsigned(voters, targets, active_voters, degree)
+}
+
+}
+
 impl pallet_election_provider_multi_phase::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
@@ -725,8 +731,7 @@ impl pallet_election_provider_multi_phase::Config for Runtime {
 	type BetterUnsignedThreshold = BetterUnsignedThreshold;
 	type BetterSignedThreshold = ();
 	type OffchainRepeat = OffchainRepeat;
-	type MinerMaxWeight = MinerMaxWeight;
-	type MinerMaxLength = MinerMaxLength;
+	type MinerConfig = Self;
 	type MinerTxPriority = MultiPhaseUnsignedPriority;
 	type SignedMaxSubmissions = ConstU32<10>;
 	type SignedMaxRefunds = SignedMaxRefunds;
@@ -734,11 +739,10 @@ impl pallet_election_provider_multi_phase::Config for Runtime {
 	type SignedDepositBase = SignedDepositBase;
 	type SignedDepositByte = SignedDepositByte;
 	type SignedDepositWeight = ();
-	type SignedMaxWeight = MinerMaxWeight;
+	type SignedMaxWeight = <Self::MinerConfig as pallet_election_provider_multi_phase::MinerConfig>::MaxWeight;
 	type SlashHandler = (); // burn slashes
 	type RewardHandler = (); // nothing to do upon rewards
 	type DataProvider = Staking;
-	type Solution = NposSolution16;
 	type Fallback = onchain::BoundedExecution<OnChainSeqPhragmen>;
 	type GovernanceFallback = onchain::BoundedExecution<OnChainSeqPhragmen>;
 	type Solver = SequentialPhragmen<AccountId, SolutionAccuracyOf<Self>, OffchainRandomBalancing>;
