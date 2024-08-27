@@ -65,7 +65,7 @@ where
 {
 	let permit_pool = Arc::new(Semaphore::new(rpc_config.ethapi_max_permits as usize));
 
-	let (trace_filter_task, trace_filter_requester) = 
+	let (trace_filter_task, trace_filter_requester) =
 		if rpc_config.ethapi.contains(&EthApiCmd::Trace) {
 		let (trace_filter_task, trace_filter_requester) = CacheTask::create(
 			Arc::clone(&params.client),
@@ -86,6 +86,7 @@ where
 			Arc::clone(&params.frontier_backend),
 			Arc::clone(&permit_pool),
 			Arc::clone(&params.overrides),
+			rpc_config.tracing_raw_max_memory_usage,
 		);
 		(Some(debug_task), Some(debug_requester))
 	} else {
