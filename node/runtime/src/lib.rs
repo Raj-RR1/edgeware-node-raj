@@ -1595,7 +1595,7 @@ pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExt
 
 /// Executive: handles dispatch to the various modules.
 pub type Executive =
-	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem, AllEdgewareMigrations>;
+	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem, (AllEdgewareMigrations, pallet_bags_list::migrations::AddScore<Runtime>),>;
 
 pub type Extrinsic = <Block as BlockT>::Extrinsic;
 
