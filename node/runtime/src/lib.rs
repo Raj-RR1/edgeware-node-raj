@@ -1158,6 +1158,8 @@ impl pallet_contracts::Config for Runtime {
 	type Schedule = Schedule;
 	type AddressGenerator = pallet_contracts::DefaultAddressGenerator;
 	type ContractAccessWeight = ();
+    type MaxCodeLen = ConstU32<{ 128 * 1024 }>;// to be reviewed
+    type RelaxedMaxCodeLen = ConstU32<{ 256 * 1024 }>;//  to be reviewed
 	}
 
 impl pallet_sudo::Config for Runtime {
