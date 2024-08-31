@@ -127,6 +127,7 @@ getrandom = { version = "0.2", features = ["js"] }
 # used for runtime benchmarking
 frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.22", default-features = false, optional = true }
 frame-system-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.22", default-features = false, optional = true }
+pallet-election-provider-support-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.22", default-features = false, optional = true}
 hex-literal = "0.3.4"
 
 [build-dependencies]
@@ -243,4 +244,5 @@ runtime-benchmarks = [
 	"pallet-preimage/runtime-benchmarks",
 	"pallet-indices/runtime-benchmarks",
 	"pallet-balances/runtime-benchmarks",
+	"pallet-election-provider-support-benchmarking/runtime-benchmarks",
 ]

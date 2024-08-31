@@ -1629,6 +1629,7 @@ mod benches {
 		[pallet_recovery, Recovery]
 		[pallet_vesting, Vesting]
 		[pallet_assets, Assets]
+		[frame_election_provider_support, ElectionProviderBench::<Runtime>]
 
 	);
 }
@@ -2121,6 +2122,7 @@ impl_runtime_apis! {
 			use frame_support::traits::StorageInfoTrait;
 			use frame_system_benchmarking::Pallet as SystemBench;
 			use frame_benchmarking::baseline::Pallet as Baseline;
+			use pallet_election_provider_support_benchmarking::Pallet as ElectionProviderBench;
 
 			let mut list = Vec::<BenchmarkList>::new();
 
@@ -2139,8 +2141,10 @@ impl_runtime_apis! {
 
 			use frame_system_benchmarking::Pallet as SystemBench;
 			use frame_benchmarking::baseline::Pallet as Baseline;
+			use pallet_election_provider_support_benchmarking::Pallet as ElectionProviderBench;
 			impl frame_system_benchmarking::Config for Runtime {}
 			impl frame_benchmarking::baseline::Config for Runtime {}
+			impl pallet_election_provider_support_benchmarking::Config for Runtime{}
 
 			let whitelist: Vec<TrackedStorageKey> = vec![
 				// Block Number
