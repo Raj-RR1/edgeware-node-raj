@@ -1610,25 +1610,25 @@ mod benches {
 		[pallet_indices, Indices]
 		[pallet_balances, Balances]
 		[frame_benchmarking::baseline, Baseline::<Runtime>]
-		// [pallet_timestamp, Timestamp]
-		// [pallet_session, SessionBench::<Runtime>]
-		// [pallet_staking, Staking]
-		// [pallet_election_provider_multi_phase, ElectionProviderMultiPhase]
-		// [pallet_bags_list, BagsList]
-		// [pallet_conviction_voting, ConvictionVoting]
-		// [pallet_referenda, Referenda]
-		// [pallet_democracy, Democracy]
-		// [pallet_collective, Council]
-		// [pallet_elections_phragmen, PhragmenElection]
-		// [pallet_treasury, Treasury]
-		// [pallet_bounties, Bounties]
-		// [pallet_tips, Tips]
-		// [pallet_contracts, Contracts]
-		// [pallet_im_online, ImOnline]
-		// [pallet_identity, Identity]
-		// [pallet_recovery, Recovery]
-		// [pallet_vesting, Vesting]
-		// [pallet_assets, Assets]
+		[pallet_timestamp, Timestamp]
+		[pallet_session, SessionBench::<Runtime>]
+		[pallet_staking, Staking]
+		[pallet_election_provider_multi_phase, ElectionProviderMultiPhase]
+		[pallet_bags_list, BagsList]
+		[pallet_conviction_voting, ConvictionVoting]
+		[pallet_referenda, Referenda]
+		[pallet_democracy, Democracy]
+		[pallet_collective, Council]
+		[pallet_elections_phragmen, PhragmenElection]
+		[pallet_treasury, Treasury]
+		[pallet_bounties, Bounties]
+		[pallet_tips, Tips]
+		[pallet_contracts, Contracts]
+		[pallet_im_online, ImOnline]
+		[pallet_identity, Identity]
+		[pallet_recovery, Recovery]
+		[pallet_vesting, Vesting]
+		[pallet_assets, Assets]
 
 	);
 }
@@ -2037,7 +2037,7 @@ impl_runtime_apis! {
 				config.as_ref().unwrap_or_else(|| <Runtime as pallet_evm::Config>::config()),
 			).map_err(|err| err.error.into())
 		 }
-		
+
 		fn create(
 			from: H160,
 			data: Vec<u8>,
