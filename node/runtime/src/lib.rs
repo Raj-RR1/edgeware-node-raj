@@ -91,6 +91,7 @@ pub mod impls;
 //use impls::{Author, CreditToBlockAuthor};
 use impls::Author;
 mod migrations;
+mod weights;
 
 /// Constant values used within the runtime.
 pub mod constants;
@@ -703,7 +704,7 @@ impl onchain::Config for OnChainSeqPhragmen {
 		pallet_election_provider_multi_phase::SolutionAccuracyOf<Runtime>,
 	>;
 	type DataProvider = <Runtime as pallet_election_provider_multi_phase::Config>::DataProvider;
-	type WeightInfo = ();
+	type WeightInfo = weights::frame_election_provider_support::WeightInfo<Runtime>;
 }
 
 impl onchain::BoundedConfig for OnChainSeqPhragmen {
@@ -1602,33 +1603,33 @@ extern crate frame_benchmarking;
 mod benches {
 	define_benchmarks!(
 		[frame_system, SystemBench::<Runtime>]
-		[pallet_utility, Utility]
-		[pallet_multisig, Multisig]
-		[pallet_proxy, Proxy]
-		[pallet_scheduler, Scheduler]
-		[pallet_preimage, Preimage]
-		[pallet_indices, Indices]
-		[pallet_balances, Balances]
+		// [pallet_utility, Utility]
+		// [pallet_multisig, Multisig]
+		// [pallet_proxy, Proxy]
+		// [pallet_scheduler, Scheduler]
+		// [pallet_preimage, Preimage]
+		// [pallet_indices, Indices]
+		// [pallet_balances, Balances]
 		[frame_benchmarking::baseline, Baseline::<Runtime>]
-		[pallet_timestamp, Timestamp]
-		[pallet_session, SessionBench::<Runtime>]
-		[pallet_staking, Staking]
-		[pallet_election_provider_multi_phase, ElectionProviderMultiPhase]
-		[pallet_bags_list, BagsList]
-		[pallet_conviction_voting, ConvictionVoting]
-		[pallet_referenda, Referenda]
-		[pallet_democracy, Democracy]
-		[pallet_collective, Council]
-		[pallet_elections_phragmen, PhragmenElection]
-		[pallet_treasury, Treasury]
-		[pallet_bounties, Bounties]
-		[pallet_tips, Tips]
-		[pallet_contracts, Contracts]
-		[pallet_im_online, ImOnline]
-		[pallet_identity, Identity]
-		[pallet_recovery, Recovery]
-		[pallet_vesting, Vesting]
-		[pallet_assets, Assets]
+		// [pallet_timestamp, Timestamp]
+		// [pallet_session, SessionBench::<Runtime>]
+		// [pallet_staking, Staking]
+		// [pallet_election_provider_multi_phase, ElectionProviderMultiPhase]
+		// [pallet_bags_list, BagsList]
+		// [pallet_conviction_voting, ConvictionVoting]
+		// [pallet_referenda, Referenda]
+		// [pallet_democracy, Democracy]
+		// [pallet_collective, Council]
+		// [pallet_elections_phragmen, PhragmenElection]
+		// [pallet_treasury, Treasury]
+		// [pallet_bounties, Bounties]
+		// [pallet_tips, Tips]
+		// [pallet_contracts, Contracts]
+		// [pallet_im_online, ImOnline]
+		// [pallet_identity, Identity]
+		// [pallet_recovery, Recovery]
+		// [pallet_vesting, Vesting]
+		// [pallet_assets, Assets]
 		[frame_election_provider_support, ElectionProviderBench::<Runtime>]
 
 	);
@@ -2126,7 +2127,7 @@ impl_runtime_apis! {
 
 			let mut list = Vec::<BenchmarkList>::new();
 
-			list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
+			list_benchmarks!(list, extra);
 			//list_benchmark!(list, extra, parachain_staking, ParachainStakingBench::<Runtime>);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
@@ -2162,7 +2163,7 @@ impl_runtime_apis! {
 			let mut batches = Vec::<BenchmarkBatch>::new();
 			let params = (&config, &whitelist);
 
-			add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
+			add_benchmarks!(params, batches);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)

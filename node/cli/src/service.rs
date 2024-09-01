@@ -77,6 +77,9 @@ pub trait IdentifyVariant {
 
 	/// Returns if this is a configuration for the `beresheet` network.
 	fn is_beresheet(&self) -> bool;
+
+	/// Returns if this is a configuration for the `development` network.
+	fn is_devnet(&self) -> bool;
 }
 
 impl IdentifyVariant for Box<dyn ChainSpec> {
@@ -86,6 +89,10 @@ impl IdentifyVariant for Box<dyn ChainSpec> {
 
 	fn is_beresheet(&self) -> bool {
 		self.id().starts_with("beresheet") || self.id().starts_with("tedg")
+	}
+
+	fn is_devnet(&self) -> bool {
+	   self.id().starts_with("dev")
 	}
 }
 
@@ -487,7 +494,7 @@ pub fn new_full_base(mut config: Configuration,
 		else{
 			edgeware_rpc::create_full(deps, subscription_executor, None).map_err(Into::into)
 		}
-	
+
 	};
 
 	let rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {

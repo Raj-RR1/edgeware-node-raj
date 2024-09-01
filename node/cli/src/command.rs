@@ -83,13 +83,12 @@ pub fn run() -> Result<()> {
 			match cmd {
 				BenchmarkCmd::Pallet(cmd) => {
 					if cfg!(feature = "runtime-benchmarks"){
-						if chain_spec.is_mainnet(){
+						if chain_spec.is_devnet(){
 							runner.sync_run(|config|{
 
 								cmd.run::<edgeware_runtime::Block, edgeware_executor::EdgewareExecutor>(config)
 							})
 						}else {
-						//we are panicking for now
 						  panic!("invalid chainspec")
 						}
 					}
@@ -97,7 +96,7 @@ pub fn run() -> Result<()> {
 						Err("Benchmarking wasn't enabled when building the node. \
 					You can enable it with `--features runtime-benchmarks`."
 							.into())
-					}	
+					}
 				}
 				BenchmarkCmd::Block(cmd) => {
 					if chain_spec.is_mainnet(){
@@ -128,7 +127,7 @@ pub fn run() -> Result<()> {
 				BenchmarkCmd::Machine(cmd) => {
                     return runner
                         .sync_run(|config| cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone()));
-                }				
+                }
 			}
 		}
 		Some(Subcommand::Key(cmd)) => cmd.run(&cli),
