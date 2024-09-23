@@ -14,8 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Edgeware.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{chain_spec, service, service::new_partial, Cli, Subcommand};
+use crate::{chain_spec, service, service::new_partial, Cli, Subcommand, service::IdentifyVariant};
 use edgeware_cli_opt::RpcConfig;
+use frame_benchmarking_cli::BenchmarkCmd;
 use sc_cli::{ChainSpec, Result, RuntimeVersion, SubstrateCli};
 use sc_service::PartialComponents;
 
@@ -76,10 +77,54 @@ pub fn run() -> Result<()> {
 	let cli = Cli::from_args();
 
 	match &cli.subcommand {
-		Some(Subcommand::Benchmark(_cmd)) => {
-			Err("Benchmarking wasn't enabled when building the node. \
-			You can enable it with `--features runtime-benchmarks`."
-				.into())
+		Some(Subcommand::Benchmark(cmd)) => {
+			let runner = cli.create_runner(cmd)?;
+			let chain_spec = &runner.config().chain_spec;
+			match cmd {
+				BenchmarkCmd::Pallet(cmd) => {
+					if cfg!(feature = "runtime-benchmarks"){
+						if chain_spec.is_devnet(){
+							runner.sync_run(|config|{
+
+								cmd.run::<edgeware_runtime::Block, edgeware_executor::EdgewareExecutor>(config)
+							})
+						}else {
+						  panic!("invalid chainspec")
+						}
+					}
+					else{
+						Err("Benchmarking wasn't enabled when building the node. \
+					You can enable it with `--features runtime-benchmarks`."
+							.into())
+					}
+				}
+				BenchmarkCmd::Block(cmd) => {
+					if chain_spec.is_mainnet(){
+						return runner.sync_run(|config|{
+							let params = service::new_partial(&config, &cli)?;
+				            cmd.run(params.client)
+
+						});
+					}
+					else{
+						panic!("invalid chainspec")
+					}
+				}
+				BenchmarkCmd::Storage(cmd)=> {
+					if chain_spec.is_mainnet(){
+						return runner.sync_run(|config|{
+							let params = service::new_partial(&config, &cli)?;
+							let db = params.backend.expose_db();
+							let storage = params.backend.expose_storage();
+							cmd.run(config, params.client, db, storage)
+						});
+					}
+					else{
+						panic!("invalid chainspec")
+					}
+				}
+				BenchmarkCmd::Overhead(_) => Err("Unsupported benchmarking command".into()),
+			}
 		}
 		Some(Subcommand::Key(cmd)) => cmd.run(&cli),
 		Some(Subcommand::Sign(cmd)) => cmd.run(),

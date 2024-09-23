@@ -1582,6 +1582,20 @@ pub type Executive =
 
 pub type Extrinsic = <Block as BlockT>::Extrinsic;
 
+#[cfg(feature = "runtime-benchmarks")]
+#[macro_use]
+extern crate frame_benchmarking;
+
+#[cfg(feature = "runtime-benchmarks")]
+mod benches {
+    define_benchmarks!(
+    [pallet_democracy, Democracy]
+    [pallet_staking, Staking]
+    [pallet_bounties, Bounties]
+    [pallet_evm, EVM]
+    );
+}
+
 impl fp_self_contained::SelfContainedCall for Call {
 	type SignedInfo = H160;
 
@@ -2070,6 +2084,10 @@ impl_runtime_apis! {
 			let mut list = Vec::<BenchmarkList>::new();
 
 			list_benchmark!(list, extra, frame_system, SystemBench::<Runtime>);
+			list_benchmark!(list, extra, pallet_democracy, Democracy);
+			list_benchmark!(list, extra, pallet_staking, Staking);
+			list_benchmark!(list, extra, pallet_bounties, Bounties);
+			list_benchmark!(list, extra, pallet_evm, EVM);
 			//list_benchmark!(list, extra, parachain_staking, ParachainStakingBench::<Runtime>);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
@@ -2102,6 +2120,10 @@ impl_runtime_apis! {
 			let params = (&config, &whitelist);
 
 			add_benchmark!(params, batches, frame_system, SystemBench::<Runtime>);
+			add_benchmark!(params, batches, pallet_democracy, Democracy);
+			add_benchmark!(params, batches, pallet_staking, Staking);
+			add_benchmark!(params, batches, pallet_bounties, Bounties);
+			add_benchmark!(params, batches, pallet_evm, EVM);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)

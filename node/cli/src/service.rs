@@ -77,6 +77,9 @@ pub trait IdentifyVariant {
 
 	/// Returns if this is a configuration for the `Westend` network.
 	fn is_beresheet(&self) -> bool;
+
+	/// Returns if this is a configuration for the `development` network.
+	fn is_devnet(&self) -> bool;
 }
 
 impl IdentifyVariant for Box<dyn ChainSpec> {
@@ -86,6 +89,10 @@ impl IdentifyVariant for Box<dyn ChainSpec> {
 
 	fn is_beresheet(&self) -> bool {
 		self.id().starts_with("beresheet") || self.id().starts_with("tedg")
+	}
+
+	fn is_devnet(&self) -> bool {
+	   self.id().starts_with("dev")
 	}
 }
 
