@@ -30,7 +30,7 @@ codec = { package = "parity-scale-codec", version = "3.1.2" }
 serde = { version = "1.0", features = ["derive"] }
 futures = { version = "0.3.1", features = ["compat"] }
 hex-literal = "0.3.1"
-jsonrpsee = { version = "0.13.1", features = ["server", "macros"] }
+jsonrpsee = { version = "0.14.0", features = ["server", "macros"] }
 log = "0.4.17"
 maplit = "1.0.2"
 rand = "0.7.2"
