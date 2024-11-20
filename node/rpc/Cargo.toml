@@ -9,7 +9,7 @@ repository = "https://github.com/PureStake/moonbeam/"
 
 [dependencies]
 futures = { version = "0.3.1", features = ["compat"] }
-jsonrpsee = { version = "0.13.1", default-features = false, features = [ "macros", "server" ] }
+jsonrpsee = { version = "0.14.0", default-features = false, features = [ "macros", "server" ] }
 pallet-contracts-rpc = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.22", default-features = false }
 pallet-transaction-payment-rpc = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.23", default-features = false }
 pallet-transaction-payment-rpc-runtime-api = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.23", default-features = false }
