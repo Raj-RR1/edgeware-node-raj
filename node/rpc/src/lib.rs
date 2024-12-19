@@ -32,7 +32,7 @@ use edgeware_cli_opt::EthApi as EthApiCmd;
 use edgeware_primitives::{AccountId, Balance, Block, BlockNumber, Hash, Index};
 use edgeware_rpc_trace::Trace;
 use edgeware_rpc_txpool::{TxPool, TxPoolServer};
-use pallet_contracts_rpc::ContractsRpc;
+use pallet_contracts_rpc::Contracts;
 use sc_finality_grandpa::{
 	FinalityProofProvider, GrandpaJustificationStream, SharedAuthoritySet, SharedVoterState
 };
@@ -232,7 +232,7 @@ where
 	// more context: https://github.com/paritytech/substrate/pull/3480
 	// These RPCs should use an asynchronous caller instead.
 	//io.extend_with(ContractsApi::to_delegate(Contracts::new(client.clone())));
-	io.merge(ContractsRpc::new(Arc::clone(&client)).into_rpc())?;
+	io.merge(Contracts::new(Arc::clone(&client)).into_rpc())?;
 	io.merge(TransactionPayment::new(Arc::clone(&client)).into_rpc())?;
 
 	// io.extend_with(sc_finality_grandpa_rpc::GrandpaApi::to_delegate(GrandpaRpcHandler::new(
@@ -410,14 +410,14 @@ where
 		);
 	}
 
-	params.task_manager.spawn_essential_handle().spawn(
-		"frontier-schema-cache-task",
-		Some("frontier"),
-		EthTask::ethereum_schema_cache_task(
-			Arc::clone(&params.client),
-			Arc::clone(&params.frontier_backend),
-		),
-	);
+	// params.task_manager.spawn_essential_handle().spawn(
+	// 	"frontier-schema-cache-task",
+	// 	Some("frontier"),
+	// 	EthTask::ethereum_schema_cache_task(
+	// 		Arc::clone(&params.client),
+	// 		Arc::clone(&params.frontier_backend),
+	// 	),
+	// );
 
 	// Spawn Frontier FeeHistory cache maintenance task.
 	params.task_manager.spawn_essential_handle().spawn(
