@@ -1066,7 +1066,7 @@ impl pallet_treasury::Config for Runtime {
 	type SpendFunds = Bounties;
 	type WeightInfo = pallet_treasury::weights::SubstrateWeight<Runtime>;
 	type MaxApprovals = MaxApprovals;
-	//type SpendOrigin = frame_support::traits::NeverEnsureOrigin<u128>;
+	type SpendOrigin = frame_support::traits::NeverEnsureOrigin<u128>;
 }
 
 #[cfg(feature = "fast-runtime")]
@@ -2029,6 +2029,7 @@ impl_runtime_apis! {
 			};
 
 			let is_transactional = false;
+			let validate = true;
 			<Runtime as pallet_evm::Config>::Runner::create(
 				from,
 				data,
@@ -2039,6 +2040,7 @@ impl_runtime_apis! {
 				nonce,
 				access_list.unwrap_or_default(),
 				is_transactional,
+				validate,
 				config.as_ref().unwrap_or(<Runtime as pallet_evm::Config>::config()),
 			).map_err(|err| err.error.into())
 		}
