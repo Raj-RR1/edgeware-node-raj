@@ -27,7 +27,7 @@ use codec::{Decode, Encode, MaxEncodedLen};
 use frame_election_provider_support::{onchain, ExtendedBalance, SequentialPhragmen, VoteWeight};
 use frame_support::{
 	construct_runtime, pallet_prelude::Get, parameter_types, traits::{
-		/*AsEnsureOriginWithArg,*/ ConstU128, ConstU16, ConstU32, Currency, EnsureOneOf, EqualPrivilegeOnly, Everything, FindAuthor, Imbalance, InstanceFilter, KeyOwnerProofSystem, LockIdentifier, Nothing, OnUnbalanced, U128CurrencyToVote
+		/*AsEnsureOriginWithArg,*/ ConstU128, ConstU16, ConstU32, Currency, EitherOfDiverse, EqualPrivilegeOnly, Everything, FindAuthor, Imbalance, InstanceFilter, KeyOwnerProofSystem, LockIdentifier, Nothing, OnUnbalanced, U128CurrencyToVote
 	}, weights::{
 		constants::{
 		BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
@@ -42,7 +42,7 @@ pub use edgeware_primitives::{AccountId, Signature};
 use edgeware_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment,/* Nonce*/};
 use migrations::AllEdgewareMigrations;
 use pallet_contracts::weights::WeightInfo;
-use pallet_election_provider_multi_phase::{MinerConfig, SolutionAccuracyOf};
+use pallet_election_provider_multi_phase::SolutionAccuracyOf;
 use pallet_grandpa::{
 	fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
@@ -592,7 +592,7 @@ impl pallet_staking::Config for Runtime {
 	type BondingDuration = BondingDuration;
 	type SlashDeferDuration = SlashDeferDuration;
 	/// A super-majority of the council can cancel the slash.
-	type SlashCancelOrigin = EnsureOneOf<
+	type SlashCancelOrigin = EitherOfDiverse<
 		EnsureRoot<AccountId>,
 		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3, 4>,
 	>;
@@ -892,20 +892,20 @@ impl pallet_democracy::Config for Runtime {
 	type ExternalOrigin =
 		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1, 2>;
 	/// A super-majority can have the next scheduled referendum be a straight majority-carries vote.
-    type ExternalMajorityOrigin = EnsureOneOf<
+    type ExternalMajorityOrigin = EitherOfDiverse<
 	    pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3, 5>,
 	    frame_system::EnsureRoot<AccountId>,
     >;
 	/// A unanimous council can have the next scheduled referendum be a straight default-carries
 	/// (NTB) vote.
-    type ExternalDefaultOrigin = EnsureOneOf<
+    type ExternalDefaultOrigin = EitherOfDiverse<
 	    pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1, 1>,
 	    frame_system::EnsureRoot<AccountId>,
     >;
     /// Three fourths of the committee can have an
     /// ExternalMajority/ExternalDefault vote be tabled immediately and with a
     /// shorter voting/enactment period.
-    type FastTrackOrigin = EnsureOneOf<
+    type FastTrackOrigin = EitherOfDiverse<
 	    pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3, 4>,
 	    frame_system::EnsureRoot<AccountId>,
     >;
@@ -917,7 +917,7 @@ impl pallet_democracy::Config for Runtime {
 		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 2, 3>;
 	// To cancel a proposal before it has been passed, 2/3 of the council must agree or
 	// Root must agree.
-	type CancelProposalOrigin = EnsureOneOf<
+	type CancelProposalOrigin = EitherOfDiverse<
 		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 2, 3>,
 		EnsureRoot<AccountId>,
 	>;
@@ -1009,7 +1009,7 @@ impl pallet_elections_phragmen::Config for Runtime {
 	type WeightInfo = pallet_elections_phragmen::weights::SubstrateWeight<Runtime>;
 }
 
-type EnsureRootOrHalfCouncil = EnsureOneOf<
+type EnsureRootOrHalfCouncil = EitherOfDiverse<
 	EnsureRoot<AccountId>,
 	pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1, 2>,
 >;
@@ -1047,11 +1047,11 @@ parameter_types! {
 impl pallet_treasury::Config for Runtime {
 	type PalletId = TreasuryPalletId;
 	type Currency = Balances;
-	type ApproveOrigin = EnsureOneOf<
+	type ApproveOrigin = EitherOfDiverse<
 		EnsureRoot<AccountId>,
 		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3, 5>,
 	>;
-	type RejectOrigin = EnsureOneOf<
+	type RejectOrigin = EitherOfDiverse<
 		EnsureRoot<AccountId>,
 		pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1, 2>,
 	>;
@@ -1066,6 +1066,7 @@ impl pallet_treasury::Config for Runtime {
 	type SpendFunds = Bounties;
 	type WeightInfo = pallet_treasury::weights::SubstrateWeight<Runtime>;
 	type MaxApprovals = MaxApprovals;
+	//type SpendOrigin = frame_support::traits::NeverEnsureOrigin<u128>;
 }
 
 #[cfg(feature = "fast-runtime")]
