@@ -1557,6 +1557,7 @@ dependencies = [
  "frame-benchmarking-cli",
  "frame-support",
  "frame-system",
+ "frame-try-runtime",
  "futures 0.3.21",
  "hex 0.3.2",
  "hex-literal",
@@ -1618,6 +1619,7 @@ dependencies = [
  "tempfile",
  "tokio 0.2.25",
  "tracing",
+ "try-runtime-cli",
 ]
 
 [[package]]
@@ -1931,6 +1933,7 @@ dependencies = [
  "frame-system",
  "frame-system-benchmarking",
  "frame-system-rpc-runtime-api",
+ "frame-try-runtime",
  "getrandom 0.2.7",
  "hex-literal",
  "integer-sqrt",
@@ -2011,6 +2014,7 @@ dependencies = [
  "sp-version",
  "static_assertions",
  "substrate-wasm-builder",
+ "try-runtime-cli",
 ]
 
 [[package]]
@@ -2866,6 +2870,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "frame-try-runtime"
+version = "0.10.0-dev"
+source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.25#3348e144f0a2b39ce08bd8e3b976c42fe0c990b9"
+dependencies = [
+ "frame-support",
+ "sp-api",
+ "sp-runtime",
+ "sp-std",
+]
+
+[[package]]
 name = "fs-swap"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3629,8 +3644,30 @@ dependencies = [
  "jsonrpsee-http-server",
  "jsonrpsee-proc-macros",
  "jsonrpsee-types",
+ "jsonrpsee-ws-client",
  "jsonrpsee-ws-server",
  "tracing",
+]
+
+[[package]]
+name = "jsonrpsee-client-transport"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ce395539a14d3ad4ec1256fde105abd36a2da25d578a291cabe98f45adfdb111"
+dependencies = [
+ "futures-util",
+ "http",
+ "jsonrpsee-core",
+ "jsonrpsee-types",
+ "pin-project 1.0.10",
+ "rustls-native-certs",
+ "soketto",
+ "thiserror",
+ "tokio 1.19.2",
+ "tokio-rustls",
+ "tokio-util",
+ "tracing",
+ "webpki-roots",
 ]
 
 [[package]]
@@ -3641,9 +3678,11 @@ checksum = "16efcd4477de857d4a2195a45769b2fe9ebb54f3ef5a4221d3b014a4fe33ec0b"
 dependencies = [
  "anyhow",
  "arrayvec 0.7.2",
+ "async-lock",
  "async-trait",
  "beef",
  "futures-channel",
+ "futures-timer",
  "futures-util",
  "globset",
  "hyper",
@@ -3702,6 +3741,17 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tracing",
+]
+
+[[package]]
+name = "jsonrpsee-ws-client"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ee043cb5dd0d51d3eb93432e998d5bae797691a7b10ec4a325e036bcdb48c48a"
+dependencies = [
+ "jsonrpsee-client-transport",
+ "jsonrpsee-core",
+ "jsonrpsee-types",
 ]
 
 [[package]]
@@ -6897,6 +6947,23 @@ dependencies = [
  "libc",
  "mach",
  "winapi",
+]
+
+[[package]]
+name = "remote-externalities"
+version = "0.10.0-dev"
+source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.25#3348e144f0a2b39ce08bd8e3b976c42fe0c990b9"
+dependencies = [
+ "env_logger",
+ "jsonrpsee",
+ "log",
+ "parity-scale-codec",
+ "serde",
+ "serde_json",
+ "sp-core",
+ "sp-io",
+ "sp-runtime",
+ "sp-version",
 ]
 
 [[package]]
@@ -10131,6 +10198,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "59547bce71d9c38b83d9c0e92b6066c4253371f15005def0c30d9657f50c7642"
 
 [[package]]
+name = "try-runtime-cli"
+version = "0.10.0-dev"
+source = "git+https://github.com/paritytech/substrate?branch=polkadot-v0.9.25#3348e144f0a2b39ce08bd8e3b976c42fe0c990b9"
+dependencies = [
+ "clap 3.2.5",
+ "jsonrpsee",
+ "log",
+ "parity-scale-codec",
+ "remote-externalities",
+ "sc-chain-spec",
+ "sc-cli",
+ "sc-executor",
+ "sc-service",
+ "serde",
+ "sp-core",
+ "sp-externalities",
+ "sp-io",
+ "sp-keystore",
+ "sp-runtime",
+ "sp-state-machine",
+ "sp-version",
+ "zstd",
+]
+
+[[package]]
 name = "tt-call"
 version = "1.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10142,7 +10234,7 @@ version = "1.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if 0.1.10",
  "digest 0.10.3",
  "rand 0.8.5",
  "static_assertions",

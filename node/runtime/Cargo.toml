@@ -129,6 +129,10 @@ frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch =
 frame-system-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25", default-features = false, optional = true }
 hex-literal = "0.3.4"
 
+# try-runtime
+frame-try-runtime = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25", optional = true }
+try-runtime-cli = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25", optional = true }
+
 [build-dependencies]
 substrate-wasm-builder = { package = "substrate-wasm-builder", git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25" }
 
@@ -225,6 +229,7 @@ std = [
 	"rlp/std",
 	"sha3/std",
 	"sp-sandbox/std",
+	"frame-try-runtime/std"
 ]
 
 # Will be enabled by the `wasm-builder` when building the runtime for WASM.
@@ -235,4 +240,43 @@ runtime-benchmarks = [
 	"frame-support/runtime-benchmarks",
 	"frame-system/runtime-benchmarks",
 	"frame-system-benchmarking",
+]
+
+try-runtime = [
+ "frame-try-runtime",
+ "frame-executive/try-runtime",
+ "frame-system/try-runtime",
+ "pallet-randomness-collective-flip/try-runtime",
+ "pallet-utility/try-runtime",
+ "pallet-multisig/try-runtime",
+ "pallet-proxy/try-runtime",
+ "pallet-scheduler/try-runtime",
+ "pallet-preimage/try-runtime",
+ "pallet-aura/try-runtime",
+ "pallet-indices/try-runtime",
+ "pallet-balances/try-runtime",
+ "pallet-transaction-payment/try-runtime",
+ "pallet-timestamp/try-runtime",
+ "pallet-authorship/try-runtime",
+ "pallet-session/try-runtime",
+ "pallet-staking/try-runtime",
+ "pallet-election-provider-multi-phase/try-runtime",
+ "pallet-bags-list/try-runtime",
+ "pallet-democracy/try-runtime",
+ "pallet-collective/try-runtime",
+ "pallet-elections-phragmen/try-runtime",
+ "pallet-treasury/try-runtime",
+ "pallet-bounties/try-runtime",
+ "pallet-tips/try-runtime",
+ "pallet-contracts/try-runtime",
+ "pallet-sudo/try-runtime",
+ "pallet-im-online/try-runtime",
+ "pallet-offences/try-runtime",
+ "pallet-authority-discovery/try-runtime",
+ "pallet-grandpa/try-runtime",
+ "pallet-identity/try-runtime",
+ "pallet-recovery/try-runtime",
+ "pallet-recovery/try-runtime",
+ "pallet-assets/try-runtime",
+ "pallet-ethereum/try-runtime",
 ]

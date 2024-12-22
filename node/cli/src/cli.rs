@@ -21,6 +21,7 @@ use sc_cli::{KeySubcommand, SignCmd, VanityCmd, VerifyCmd};
 //use structopt::StructOpt;
 use edgeware_cli_opt::EthApi;
 use clap::Parser;
+use try_runtime_cli::TryRuntimeCmd;
 
 //use ethereum_types::{H160, H256, U256};
 
@@ -144,4 +145,13 @@ pub enum Subcommand {
 	Revert(sc_cli::RevertCmd),
 
 	ChainInfo(sc_cli::ChainInfoCmd),
+
+	/// Try some command against runtime state
+	#[cfg(feature = "try-runtime")]
+	TryRuntime(try_runtime_cli::TryRuntimeCmd),
+
+	/// Try some command against runtime state. Note: `try-runtime` feature must be enabled
+    #[cfg(not(feature = "try-runtime"))]
+    TryRuntime,
+
 }

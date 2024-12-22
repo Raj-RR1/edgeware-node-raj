@@ -112,6 +112,10 @@ sc-cli = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v
 frame-benchmarking-cli = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25", optional = true }
 edgeware-cli-opt = { package = "edgeware-cli-opt", path = "../cli-opt", optional = true }
 
+# try-runtime
+frame-try-runtime = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25", optional = true }
+try-runtime-cli = { git = "https://github.com/paritytech/substrate", branch = "polkadot-v0.9.25", optional = true }
+
 fc-consensus = { default-features = false, git = "https://github.com/paritytech/frontier", branch = "polkadot-v0.9.25" }
 fp-consensus = { default-features = false, git = "https://github.com/paritytech/frontier", branch = "polkadot-v0.9.25" }
 fc-rpc = { default-features = false, git = "https://github.com/paritytech/frontier", branch = "polkadot-v0.9.25", features = ["rpc_binary_search_estimate"] }
@@ -168,7 +172,8 @@ cli = [
 	"pallet-contracts/std",
 #	"ethereum-types/std",
 	"substrate-build-script-utils",
-	"edgeware-cli-opt"
+	"edgeware-cli-opt",
+	"try-runtime-cli",
 ]
 frontier-block-import = []
 cli-completion = []
@@ -182,3 +187,4 @@ fast-runtime = [
 beresheet-runtime = [
 	"edgeware-runtime/beresheet-runtime",
 ]
+try-runtime = ["edgeware-runtime/try-runtime", "try-runtime-cli"]
