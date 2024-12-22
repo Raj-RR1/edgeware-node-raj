@@ -245,6 +245,7 @@ runtime-benchmarks = [
 try-runtime = [
  "frame-try-runtime",
  "frame-executive/try-runtime",
+ "frame-support/try-runtime",
  "frame-system/try-runtime",
  "pallet-randomness-collective-flip/try-runtime",
  "pallet-utility/try-runtime",
@@ -275,7 +276,6 @@ try-runtime = [
  "pallet-authority-discovery/try-runtime",
  "pallet-grandpa/try-runtime",
  "pallet-identity/try-runtime",
- "pallet-recovery/try-runtime",
  "pallet-recovery/try-runtime",
  "pallet-assets/try-runtime",
  "pallet-ethereum/try-runtime",
