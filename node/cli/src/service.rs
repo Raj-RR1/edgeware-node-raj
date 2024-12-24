@@ -585,6 +585,8 @@ pub fn new_full_base(mut config: Configuration,
 			sc_authority_discovery::new_worker_and_service_with_config(
 				sc_authority_discovery::WorkerConfig {
 					publish_non_global_ips: auth_disc_publish_non_global_ips,
+					// Require that authority discovery records are signed.
+					strict_record_validation: true,
 					..Default::default()
 				},
 				client.clone(),
