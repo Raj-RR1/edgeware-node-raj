@@ -136,11 +136,11 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// and set impl_version to equal spec_version. If only runtime
 	// implementation changes and behavior does not, then leave spec_version as
 	// is and increment impl_version.
-	spec_version: 54,
-	impl_version: 54,
+	spec_version: 55,
+	impl_version: 55,
 	apis: RUNTIME_API_VERSIONS,
-	transaction_version: 3,
-	state_version: 54,
+	transaction_version: 4,
+	state_version: 55,
 };
 
 #[cfg(feature = "beresheet-runtime")]
@@ -153,11 +153,11 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// and set impl_version to equal spec_version. If only runtime
 	// implementation changes and behavior does not, then leave spec_version as
 	// is and increment impl_version.
-	spec_version: 10053,
-	impl_version: 10053,
+	spec_version: 10055,
+	impl_version: 10055,
 	apis: RUNTIME_API_VERSIONS,
-	transaction_version: 2,
-	state_version: 53,
+	transaction_version: 3,
+	state_version: 55,
 };
 
 /// Native version.
@@ -2008,7 +2008,7 @@ impl_runtime_apis! {
 				config.as_ref().unwrap_or_else(|| <Runtime as pallet_evm::Config>::config()),
 			).map_err(|err| err.error.into())
 		 }
-		
+
 		fn create(
 			from: H160,
 			data: Vec<u8>,
