@@ -26,19 +26,13 @@
 use codec::{Decode, Encode, MaxEncodedLen};
 use frame_election_provider_support::{onchain, ExtendedBalance, SequentialPhragmen, VoteWeight};
 use frame_support::{
-	construct_runtime,
-	pallet_prelude::Get,
-	parameter_types,
-	traits::{
-		/*AsEnsureOriginWithArg,*/ ConstU128, ConstU16, ConstU32, Currency, EnsureOneOf,
-		EqualPrivilegeOnly, Everything, Imbalance, InstanceFilter, KeyOwnerProofSystem,
-		LockIdentifier, Nothing, OnUnbalanced, U128CurrencyToVote, FindAuthor,
-	},
-	weights::{
-		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
+	construct_runtime, pallet_prelude::Get, parameter_types, traits::{
+		/*AsEnsureOriginWithArg,*/ ConstU128, ConstU16, ConstU32, Currency, EitherOfDiverse, EqualPrivilegeOnly, Everything, FindAuthor, Imbalance, InstanceFilter, KeyOwnerProofSystem, LockIdentifier, Nothing, OnUnbalanced, U128CurrencyToVote
+	}, weights::{
+		constants::{
+		BlockExecutionWeight, ExtrinsicBaseWeight, RocksDbWeight, WEIGHT_PER_SECOND},
 		ConstantMultiplier, DispatchClass, IdentityFee, Weight,
-	},
-	PalletId, RuntimeDebug, ConsensusEngineId,
+	}, ConsensusEngineId, PalletId, RuntimeDebug
 };
 use frame_system::{
 	limits::{BlockLength, BlockWeights},
@@ -46,6 +40,7 @@ use frame_system::{
 };
 pub use edgeware_primitives::{AccountId, Signature};
 use edgeware_primitives::{AccountIndex, Balance, BlockNumber, Hash, Index, Moment,/* Nonce*/};
+use migrations::AllEdgewareMigrations;
 use pallet_contracts::weights::WeightInfo;
 use pallet_election_provider_multi_phase::SolutionAccuracyOf;
 use pallet_grandpa::{
@@ -141,11 +136,11 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// and set impl_version to equal spec_version. If only runtime
 	// implementation changes and behavior does not, then leave spec_version as
 	// is and increment impl_version.
-	spec_version: 54,
-	impl_version: 54,
+	spec_version: 55,
+	impl_version: 55,
 	apis: RUNTIME_API_VERSIONS,
-	transaction_version: 3,
-	state_version: 54,
+	transaction_version: 4,
+	state_version: 55,
 };
 
 #[cfg(feature = "beresheet-runtime")]
@@ -158,11 +153,11 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// and set impl_version to equal spec_version. If only runtime
 	// implementation changes and behavior does not, then leave spec_version as
 	// is and increment impl_version.
-	spec_version: 10053,
-	impl_version: 10053,
+	spec_version: 10055,
+	impl_version: 10055,
 	apis: RUNTIME_API_VERSIONS,
-	transaction_version: 2,
-	state_version: 53,
+	transaction_version: 3,
+	state_version: 55,
 };
 
 /// Native version.
@@ -597,7 +592,7 @@ impl pallet_staking::Config for Runtime {
 	type BondingDuration = BondingDuration;
 	type SlashDeferDuration = SlashDeferDuration;
 	/// A super-majority of the council can cancel the slash.
-	type SlashCancelOrigin = EnsureOneOf<
+	type SlashCancelOrigin = EitherOfDiverse<
 		EnsureRoot<AccountId>,
 		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3, 4>,
 	>;
@@ -608,7 +603,7 @@ impl pallet_staking::Config for Runtime {
 	type OffendingValidatorsThreshold = OffendingValidatorsThreshold;
 	type ElectionProvider = ElectionProviderMultiPhase;
 	type GenesisElectionProvider = onchain::UnboundedExecution<OnChainSeqPhragmen>;
-	type VoterList = BagsList;
+	type VoterList = VoterList;
 	type MaxUnlockingChunks = ConstU32<32>;
 	type OnStakerSlash = ();
 	type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
@@ -715,6 +710,18 @@ parameter_types!{
 	pub const SignedMaxRefunds: u32 = 16 / 4;
 }
 
+impl pallet_election_provider_multi_phase::MinerConfig for Runtime{
+type AccountId = AccountId;
+type MaxLength = MinerMaxLength;
+type MaxWeight = MinerMaxWeight;
+type Solution = NposSolution16;
+type MaxVotesPerVoter = <<Self as pallet_election_provider_multi_phase::Config>::DataProvider as frame_election_provider_support::ElectionDataProvider>::MaxVotesPerVoter;
+fn solution_weight(voters: u32, targets: u32, active_voters: u32, degree: u32) -> Weight {
+    <<Self as pallet_election_provider_multi_phase::Config>::WeightInfo as pallet_election_provider_multi_phase::WeightInfo>::submit_unsigned(voters, targets, active_voters, degree)
+}
+
+}
+
 impl pallet_election_provider_multi_phase::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
@@ -724,8 +731,7 @@ impl pallet_election_provider_multi_phase::Config for Runtime {
 	type BetterUnsignedThreshold = BetterUnsignedThreshold;
 	type BetterSignedThreshold = ();
 	type OffchainRepeat = OffchainRepeat;
-	type MinerMaxWeight = MinerMaxWeight;
-	type MinerMaxLength = MinerMaxLength;
+	type MinerConfig = Self;
 	type MinerTxPriority = MultiPhaseUnsignedPriority;
 	type SignedMaxSubmissions = ConstU32<10>;
 	type SignedMaxRefunds = SignedMaxRefunds;
@@ -733,11 +739,10 @@ impl pallet_election_provider_multi_phase::Config for Runtime {
 	type SignedDepositBase = SignedDepositBase;
 	type SignedDepositByte = SignedDepositByte;
 	type SignedDepositWeight = ();
-	type SignedMaxWeight = MinerMaxWeight;
+	type SignedMaxWeight = <Self::MinerConfig as pallet_election_provider_multi_phase::MinerConfig>::MaxWeight;
 	type SlashHandler = (); // burn slashes
 	type RewardHandler = (); // nothing to do upon rewards
 	type DataProvider = Staking;
-	type Solution = NposSolution16;
 	type Fallback = onchain::BoundedExecution<OnChainSeqPhragmen>;
 	type GovernanceFallback = onchain::BoundedExecution<OnChainSeqPhragmen>;
 	type Solver = SequentialPhragmen<AccountId, SolutionAccuracyOf<Self>, OffchainRandomBalancing>;
@@ -887,20 +892,20 @@ impl pallet_democracy::Config for Runtime {
 	type ExternalOrigin =
 		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1, 2>;
 	/// A super-majority can have the next scheduled referendum be a straight majority-carries vote.
-    type ExternalMajorityOrigin = EnsureOneOf<
+    type ExternalMajorityOrigin = EitherOfDiverse<
 	    pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3, 5>,
 	    frame_system::EnsureRoot<AccountId>,
     >;
 	/// A unanimous council can have the next scheduled referendum be a straight default-carries
 	/// (NTB) vote.
-    type ExternalDefaultOrigin = EnsureOneOf<
+    type ExternalDefaultOrigin = EitherOfDiverse<
 	    pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 1, 1>,
 	    frame_system::EnsureRoot<AccountId>,
     >;
     /// Three fourths of the committee can have an
     /// ExternalMajority/ExternalDefault vote be tabled immediately and with a
     /// shorter voting/enactment period.
-    type FastTrackOrigin = EnsureOneOf<
+    type FastTrackOrigin = EitherOfDiverse<
 	    pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3, 4>,
 	    frame_system::EnsureRoot<AccountId>,
     >;
@@ -912,7 +917,7 @@ impl pallet_democracy::Config for Runtime {
 		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 2, 3>;
 	// To cancel a proposal before it has been passed, 2/3 of the council must agree or
 	// Root must agree.
-	type CancelProposalOrigin = EnsureOneOf<
+	type CancelProposalOrigin = EitherOfDiverse<
 		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 2, 3>,
 		EnsureRoot<AccountId>,
 	>;
@@ -1004,7 +1009,7 @@ impl pallet_elections_phragmen::Config for Runtime {
 	type WeightInfo = pallet_elections_phragmen::weights::SubstrateWeight<Runtime>;
 }
 
-type EnsureRootOrHalfCouncil = EnsureOneOf<
+type EnsureRootOrHalfCouncil = EitherOfDiverse<
 	EnsureRoot<AccountId>,
 	pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1, 2>,
 >;
@@ -1042,11 +1047,11 @@ parameter_types! {
 impl pallet_treasury::Config for Runtime {
 	type PalletId = TreasuryPalletId;
 	type Currency = Balances;
-	type ApproveOrigin = EnsureOneOf<
+	type ApproveOrigin = EitherOfDiverse<
 		EnsureRoot<AccountId>,
 		pallet_collective::EnsureProportionAtLeast<AccountId, CouncilCollective, 3, 5>,
 	>;
-	type RejectOrigin = EnsureOneOf<
+	type RejectOrigin = EitherOfDiverse<
 		EnsureRoot<AccountId>,
 		pallet_collective::EnsureProportionMoreThan<AccountId, CouncilCollective, 1, 2>,
 	>;
@@ -1061,6 +1066,7 @@ impl pallet_treasury::Config for Runtime {
 	type SpendFunds = Bounties;
 	type WeightInfo = pallet_treasury::weights::SubstrateWeight<Runtime>;
 	type MaxApprovals = MaxApprovals;
+	type SpendOrigin = frame_support::traits::NeverEnsureOrigin<u128>;
 }
 
 #[cfg(feature = "fast-runtime")]
@@ -1153,6 +1159,8 @@ impl pallet_contracts::Config for Runtime {
 	type Schedule = Schedule;
 	type AddressGenerator = pallet_contracts::DefaultAddressGenerator;
 	type ContractAccessWeight = ();
+    type MaxCodeLen = ConstU32<{ 128 * 1024 }>;// to be reviewed
+    type RelaxedMaxCodeLen = ConstU32<{ 256 * 1024 }>;//  to be reviewed
 	}
 
 impl pallet_sudo::Config for Runtime {
@@ -1526,7 +1534,7 @@ construct_runtime!(
 		ElectionProviderMultiPhase: pallet_election_provider_multi_phase = 39,
 		DynamicFee: pallet_dynamic_fee = 40,
 		BaseFee: pallet_base_fee = 41,
-		BagsList: pallet_bags_list = 42,
+		VoterList: pallet_bags_list = 42,
 		Preimage: pallet_preimage = 43,
 //		Referenda: pallet_referenda,
 //		ConvictionVoting: pallet_conviction_voting,
@@ -1590,7 +1598,7 @@ pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExt
 
 /// Executive: handles dispatch to the various modules.
 pub type Executive =
-	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem, ()>;
+	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem, (AllEdgewareMigrations, pallet_bags_list::migrations::AddScore<Runtime>),>;
 
 pub type Extrinsic = <Block as BlockT>::Extrinsic;
 
@@ -1618,9 +1626,9 @@ impl fp_self_contained::SelfContainedCall for Call {
 		}
 	}
 
-	fn pre_dispatch_self_contained(&self, info: &Self::SignedInfo) -> Option<Result<(), TransactionValidityError>> {
+	fn pre_dispatch_self_contained(&self, info: &Self::SignedInfo, dispatch_info: &DispatchInfoOf<Call>, len: usize) -> Option<Result<(), TransactionValidityError>> {
 		match self {
-			Call::Ethereum(call) => call.pre_dispatch_self_contained(info),
+			Call::Ethereum(call) => call.pre_dispatch_self_contained(info, dispatch_info, len),
 			_ => None,
 		}
 	}
@@ -1984,6 +1992,7 @@ impl_runtime_apis! {
 			};
 
 			let is_transactional = false;
+			let validate = true;
 			<Runtime as pallet_evm::Config>::Runner::call(
 				from,
 				to,
@@ -1995,10 +2004,11 @@ impl_runtime_apis! {
 				nonce,
 				access_list.unwrap_or_default(),
 				is_transactional,
+				validate,
 				config.as_ref().unwrap_or_else(|| <Runtime as pallet_evm::Config>::config()),
 			).map_err(|err| err.error.into())
 		 }
-		
+
 		fn create(
 			from: H160,
 			data: Vec<u8>,
@@ -2019,6 +2029,7 @@ impl_runtime_apis! {
 			};
 
 			let is_transactional = false;
+			let validate = true;
 			<Runtime as pallet_evm::Config>::Runner::create(
 				from,
 				data,
@@ -2029,6 +2040,7 @@ impl_runtime_apis! {
 				nonce,
 				access_list.unwrap_or_default(),
 				is_transactional,
+				validate,
 				config.as_ref().unwrap_or(<Runtime as pallet_evm::Config>::config()),
 			).map_err(|err| err.error.into())
 		}

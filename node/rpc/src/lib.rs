@@ -32,7 +32,7 @@ use edgeware_cli_opt::EthApi as EthApiCmd;
 use edgeware_primitives::{AccountId, Balance, Block, BlockNumber, Hash, Index};
 use edgeware_rpc_trace::Trace;
 use edgeware_rpc_txpool::{TxPool, TxPoolServer};
-use pallet_contracts_rpc::ContractsRpc;
+use pallet_contracts_rpc::Contracts;
 use sc_finality_grandpa::{
 	FinalityProofProvider, GrandpaJustificationStream, SharedAuthoritySet, SharedVoterState
 };
@@ -102,7 +102,7 @@ pub struct FullDeps<C, P, BE, A: ChainApi> {
 	pub grandpa: GrandpaDeps<BE>,
 
 	/// Graph pool instance.
-	pub graph: Arc<Pool<A>>,	
+	pub graph: Arc<Pool<A>>,
 	/// The Node authority flag
 	pub is_authority: bool,
 	/// Whether to enable dev signer
@@ -201,9 +201,9 @@ where
 	A: ChainApi<Block = Block> + 'static,
 {
 	use pallet_contracts_rpc::ContractsApiServer;
-	use pallet_transaction_payment_rpc::{TransactionPaymentApiServer, TransactionPaymentRpc};
+	use pallet_transaction_payment_rpc::{TransactionPaymentApiServer, TransactionPayment};
 	use sc_rpc::dev::Dev;
-	use substrate_frame_rpc_system::{SystemRpc, SystemApiServer};
+	use substrate_frame_rpc_system::{System, SystemApiServer};
 
 	use fc_rpc::{
 		Eth, EthDevSigner, EthFilter, EthFilterApiServer, EthPubSub, EthPubSubApiServer, EthSigner,
@@ -212,9 +212,9 @@ where
 
 	let mut io = RpcModule::new(());
 	let FullDeps { client, pool, deny_unsafe, grandpa,
-		
+
 		graph, is_authority, enable_dev_signer, network, filter_pool,
-		ethapi_cmd, backend, max_past_logs, fee_history_cache, 
+		ethapi_cmd, backend, max_past_logs, fee_history_cache,
 		fee_history_cache_limit, overrides, block_data_cache,
 		command_sink, } = deps;
 
@@ -226,14 +226,14 @@ where
 		finality_provider,
 	} = grandpa;
 
-	io.merge(SystemRpc::new(Arc::clone(&client), Arc::clone(&pool), deny_unsafe).into_rpc())?;
+	io.merge(System::new(Arc::clone(&client), Arc::clone(&pool), deny_unsafe).into_rpc())?;
 
 	// Making synchronous calls in light client freezes the browser currently,
 	// more context: https://github.com/paritytech/substrate/pull/3480
 	// These RPCs should use an asynchronous caller instead.
 	//io.extend_with(ContractsApi::to_delegate(Contracts::new(client.clone())));
-	io.merge(ContractsRpc::new(Arc::clone(&client)).into_rpc())?;	
-	io.merge(TransactionPaymentRpc::new(Arc::clone(&client)).into_rpc())?;
+	io.merge(Contracts::new(Arc::clone(&client)).into_rpc())?;
+	io.merge(TransactionPayment::new(Arc::clone(&client)).into_rpc())?;
 
 	// io.extend_with(sc_finality_grandpa_rpc::GrandpaApi::to_delegate(GrandpaRpcHandler::new(
 	// 	shared_authority_set.clone(),
@@ -243,7 +243,7 @@ where
 	// 	finality_provider,
 	// )));
 
-	io.merge(sc_finality_grandpa_rpc::GrandpaRpc::new(subscription_executor, shared_authority_set, shared_voter_state, justification_stream, finality_provider).into_rpc())?;
+	io.merge(sc_finality_grandpa_rpc::Grandpa::new(subscription_executor, shared_authority_set, shared_voter_state, justification_stream, finality_provider).into_rpc())?;
 
 	// io.extend_with(substrate_state_trie_migration_rpc::StateMigrationApi::to_delegate(
 	// 	substrate_state_trie_migration_rpc::MigrationRpc::new(client.clone(), backend, deny_unsafe),
@@ -258,7 +258,7 @@ where
 	// ));
 
 	io.merge(Dev::new(Arc::clone(&client), deny_unsafe).into_rpc())?;
-	
+
 	let mut signers = Vec::new();
 	if enable_dev_signer {
 		signers.push(Box::new(EthDevSigner::new()) as Box<dyn EthSigner>);
@@ -410,14 +410,14 @@ where
 		);
 	}
 
-	params.task_manager.spawn_essential_handle().spawn(
-		"frontier-schema-cache-task",
-		Some("frontier"),
-		EthTask::ethereum_schema_cache_task(
-			Arc::clone(&params.client),
-			Arc::clone(&params.frontier_backend),
-		),
-	);
+	// params.task_manager.spawn_essential_handle().spawn(
+	// 	"frontier-schema-cache-task",
+	// 	Some("frontier"),
+	// 	EthTask::ethereum_schema_cache_task(
+	// 		Arc::clone(&params.client),
+	// 		Arc::clone(&params.frontier_backend),
+	// 	),
+	// );
 
 	// Spawn Frontier FeeHistory cache maintenance task.
 	params.task_manager.spawn_essential_handle().spawn(
