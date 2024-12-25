@@ -312,7 +312,8 @@ pub struct NewFullBase {
 /// Creates a full service from the configuration.
 pub fn new_full_base(mut config: Configuration,
 	cli: &Cli,
-	rpc_config: RpcConfig
+	rpc_config: RpcConfig,
+	hwbench: Option<sc_sysinfo::HwBench>,
 ) -> Result<NewFullBase, ServiceError> {
 	let sc_service::PartialComponents {
 		client,
@@ -487,7 +488,7 @@ pub fn new_full_base(mut config: Configuration,
 		else{
 			edgeware_rpc::create_full(deps, subscription_executor, None).map_err(Into::into)
 		}
-	
+
 	};
 
 	let rpc_handlers = sc_service::spawn_tasks(sc_service::SpawnTasksParams {
@@ -503,6 +504,13 @@ pub fn new_full_base(mut config: Configuration,
 		telemetry: telemetry.as_mut(),
 	})?;
 
+	if let Some(hwbench) = hwbench{
+      sc_sysinfo::print_hwbench(&hwbench);
+      if let Some(ref mut telemetry) = telemetry{
+       let telemetry_handle = telemetry.handle();
+       task_manager.spawn_handle().spawn("telemetry_hwbench", None, sc_sysinfo::initialize_hwbench_telemetry(telemetry_handle, hwbench));
+      }
+	}
 
 	let backoff_authoring_blocks: Option<()> = None;
 
@@ -652,6 +660,6 @@ pub fn new_full_base(mut config: Configuration,
 
 
 /// Builds a new service for a full client.
-pub fn new_full(config: Configuration, cli: &Cli, rpc_config: RpcConfig) -> Result<TaskManager, ServiceError> {
-	new_full_base(config, cli, rpc_config).map(|NewFullBase { task_manager, .. }| task_manager)
+pub fn new_full(config: Configuration, cli: &Cli, rpc_config: RpcConfig,hwbench: Option<sc_sysinfo::HwBench>) -> Result<TaskManager, ServiceError> {
+	new_full_base(config, cli, rpc_config, hwbench).map(|NewFullBase { task_manager, .. }| task_manager)
 }

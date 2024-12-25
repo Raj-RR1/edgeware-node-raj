@@ -82,6 +82,9 @@ pub struct RunCmd {
 	/// Maximum fee history cache size.
 	#[clap(long, default_value = "2048")]
 	pub fee_history_limit: u64,
+
+	#[clap(long)]
+	pub no_hardware_benchmarks: bool,
 }
 
 /// An overarching CLI command definition.
