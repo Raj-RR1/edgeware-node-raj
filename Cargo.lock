@@ -11016,3 +11016,8 @@ dependencies = [
  "cc",
  "libc",
 ]
+
+[[patch.unused]]
+name = "bindgen"
+version = "0.63.0"
+source = "git+https://github.com/rust-lang/rust-bindgen.git?tag=v0.63.0#c51591941e18a75c312c7c237c4969dd22c40467"
